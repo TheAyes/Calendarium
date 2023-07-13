@@ -1,0 +1,31 @@
+{
+	"extends": "../../tsconfig.json",
+	"compilerOptions": {
+		"rootDir": ".",
+		"outDir": "../../build/api",
+		"baseUrl": ".",
+		"module": "esnext",
+		"target": "esnext",
+		"sourceMap": true,
+		"noEmit": true,
+		"strict": true,
+		"esModuleInterop": true,
+		"moduleResolution": "node",
+		"skipLibCheck": true,
+		"allowJs": false,
+		"forceConsistentCasingInFileNames": true,
+		"allowImportingTsExtensions": true
+	},
+	"lib": [
+		"esnext"
+	],
+	"include": [
+		"src/**/*"
+	],
+	"exclude": [
+		"node_modules"
+	],
+	"ts-node": {
+		"esm": true
+	}
+}

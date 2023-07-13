@@ -1,0 +1,27 @@
+{
+	"compilerOptions": {
+		"incremental": true,
+		"outDir": "./dist",
+		"baseUrl": ".",
+		"moduleResolution": "Node",
+		"module": "esnext",
+		"target": "ES2018",
+		"sourceMap": true,
+		"lib": [
+			"esnext"
+		],
+		"esModuleInterop": true,
+		"alwaysStrict": true,
+		"strictNullChecks": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": true,
+		"resolveJsonModule": true
+	},
+	"exclude": [
+		"node_modules",
+		"build",
+		"*.d.ts"
+	]
+}
