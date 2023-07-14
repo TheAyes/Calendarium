@@ -9,6 +9,7 @@ config({ path: '../../.env' });
 // https://vitejs.dev/config/
 export default defineConfig({
 	plugins: [react()],
+
 	server: {
 		port: process.env.CLIENT_PORT ? Number(process.env.CLIENT_PORT) : 3000,
 		proxy: {
@@ -21,5 +22,6 @@ export default defineConfig({
 	},
 	build: {
 		outDir: '../../build/client',
+		emptyOutDir: true,
 	},
 });
