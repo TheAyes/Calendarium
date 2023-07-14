@@ -2,10 +2,7 @@
 	"extends": "./tsconfig.base.json",
 	"references": [
 		{
-			"path": "apps/client"
-		},
-		{
-			"path": "packages/common"
+			"path": "apps/client/tsconfig.json"
 		}
 	]
 }
