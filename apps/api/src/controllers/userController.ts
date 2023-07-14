@@ -6,6 +6,7 @@ import { generateToken, refreshToken } from 'jwt-authorize';
 
 const userIdPattern = /^[a-z][a-z0-9_-]{2,29}$/;
 const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
 
 const errorResponse = (res: Response, status: number, error: unknown) => {
 	if (error instanceof Error) {
@@ -99,6 +100,14 @@ export const registerUser = async (req: Request, res: Response) => {
 			accessToken: null,
 			refreshToken: null,
 			error: 'Invalid email',
+		});
+	}
+
+	if (!passwordPattern.test(password)) {
+		return res.status(400).json({
+			accessToken: null,
+			refreshToken: null,
+			error: 'Invalid password',
 		});
 	}
 
