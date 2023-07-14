@@ -3,7 +3,7 @@ import { ThemeProvider } from '@emotion/react';
 import { createContext, useEffect, useState } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { darkTheme } from './themes/darkTheme.ts';
-import { AuthenticatePage } from './pages/Authenticate.tsx';
+import { AuthenticationPage } from './pages/AuthenticationPage.tsx';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
 
@@ -67,9 +67,9 @@ export const App = () => {
 					<GlobalStyles />
 					<Routes>
 						<Route index path="/" element={<></>} />
-						<Route path="/authenticate" element={<AuthenticatePage />} />
+						<Route path="/authenticate" element={<AuthenticationPage />} />
 						<Route path="/dashboard" element={<></>} />
-						<Route path="/*" element={<AuthenticatePage />} />
+						<Route path="/*" element={<AuthenticationPage />} />
 					</Routes>
 				</ThemeProvider>
 			</AppContext.Provider>
