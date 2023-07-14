@@ -4,15 +4,14 @@ interface IUser extends mongoose.Document {
 	userId: string;
 	displayName: string;
 	password: string;
-	todos: [
-		{
-			title: string;
-			completed: boolean;
-		}
-	];
+	email: string;
 }
 
 const UserSchema = new Schema({
+	displayName: {
+		type: String,
+		require: true,
+	},
 	userId: {
 		type: String,
 		require: true,

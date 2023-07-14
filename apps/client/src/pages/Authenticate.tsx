@@ -1,8 +1,7 @@
-import { FC, FormEvent, useCallback, useState } from 'react';
+import { FC, FormEvent, useCallback, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CalendariumTheme } from '../types/CalendariumTheme.ts';
-import { useTheme } from '@emotion/react';
 
 type AuthenticatePageProps = {
 	[key: string]: unknown;
@@ -346,26 +345,44 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 		},
 	] as Tab[]);
 
-	const validateUserInput = async () => {
-		const tabContent = tabs[activeTab].content;
-		let invalidFields: string[] = [];
+	const validateUserInput = useCallback(
+		(_key?: string, _value?: string, _activeTab?: number) => {
+			let invalidFields: string[] = [];
+			const validState = {};
+			if (_key !== undefined && _value !== undefined) {
+				if (_activeTab !== undefined) {
+					// Validate only the relevant input field
+					const contents = tabs[_activeTab].content;
+					const item = contents.find((c) => c.key === _key);
+					if (item?.rules) {
+						item.rules.forEach((rule) => {
+							const isValid = rule.checkFunction(_value, contents);
+							if (!isValid) invalidFields.push(_key);
+						});
+					}
 
-		tabContent.forEach((item) => {
-			item.rules?.forEach((rule) => {
-				const isValid = rule.checkFunction(item.value, tabContent);
-				if (!isValid) invalidFields.push(item.key);
-			});
-		});
+					(validState as Record<string, boolean>)[_key] = !invalidFields.includes(_key);
+				} else {
+					// Old code to validate all fields
+					const contents = tabs[activeTab].content;
+					contents.forEach((item) => {
+						item.rules?.forEach((rule) => {
+							const isValid = rule.checkFunction(item.value, contents);
+							if (!isValid) invalidFields.push(item.key);
+						});
+					});
 
-		let newValidState = {};
-		tabContent.forEach((item) => {
-			//@ts-ignore
-			newValidState[item.key] = !invalidFields.includes(item.key);
-		});
-		setValidState(newValidState);
+					contents.forEach((item) => {
+						(validState as Record<string, boolean>)[item.key] = !invalidFields.includes(item.key);
+					});
+				}
+			}
 
-		return invalidFields;
-	};
+			setValidState(validState);
+			return invalidFields;
+		},
+		[tabs, activeTab]
+	);
 
 	const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -458,11 +475,15 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 			});
 
 			setTabs(newTabs);
+			validateUserInput();
 		},
 		[activeTab, tabs]
 	);
 
-	const currentTheme = useTheme();
+	const currentTabContent = useMemo(
+		() => tabs[activeTab].content.find((currentItem) => currentItem.isFocused),
+		[activeTab, tabs]
+	);
 
 	return (
 		<StyledAuthenticatePage {...props}>
@@ -550,7 +571,7 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 			</main>
 			<aside>
 				<AnimatePresence mode="popLayout">
-					{tabs[activeTab].content.find((currentItem) => currentItem.isFocused) && (
+					{currentTabContent?.isFocused && (
 						<motion.p
 							initial={{
 								x: 50,
@@ -570,55 +591,50 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 								stiffness: 120,
 								damping: 14,
 							}}
-							key={tabs[activeTab].content.find((currentItem) => currentItem.isFocused)?.key + 'label'}
+							key={currentTabContent?.key + 'label'}
 						>
-							{tabs[activeTab].content.find((currentItem) => currentItem.isFocused)?.description}
+							{currentTabContent?.description}
 						</motion.p>
 					)}
 				</AnimatePresence>
 				<ul>
 					<AnimatePresence mode="popLayout">
-						{tabs[activeTab].content
-							.find((currentItem) => currentItem.isFocused)
-							?.rules?.map((currentRule, i) => {
-								const currentInput = tabs[activeTab].content.find(
-									(currentItem) => currentItem.isFocused
-								);
-								if (!currentInput) {
-									return <></>;
-								}
-								return (
-									<motion.li
-										key={currentRule.description + i}
-										initial={{
-											x: 50,
-											opacity: 0,
-										}}
-										animate={{
-											x: 0,
-											opacity: 1,
-										}}
-										exit={{
-											x: 50,
-											opacity: 0,
-										}}
-										transition={{
-											type: 'spring',
-											duration: 0.5,
-											stiffness: 120,
-											damping: 14,
-											delay: i * 0.05,
-										}}
-									>
-										<span>
-											{currentRule.checkFunction(currentInput.value, tabs[activeTab].content)
-												? '✔️'
-												: '❌'}
-										</span>
-										<p>{currentRule.description}</p>
-									</motion.li>
-								);
-							})}
+						{currentTabContent?.rules?.map((currentRule, i) => {
+							if (!currentTabContent) {
+								return <></>;
+							}
+							return (
+								<motion.li
+									key={currentRule.description + i}
+									initial={{
+										x: 50,
+										opacity: 0,
+									}}
+									animate={{
+										x: 0,
+										opacity: 1,
+									}}
+									exit={{
+										x: 50,
+										opacity: 0,
+									}}
+									transition={{
+										type: 'spring',
+										duration: 0.5,
+										stiffness: 120,
+										damping: 14,
+										delay: i * 0.05,
+									}}
+								>
+									<span>
+										{currentRule.checkFunction(currentTabContent.value, tabs[activeTab].content)
+											? '✔️'
+											: '❌'}
+									</span>
+									<p>{currentRule.description}</p>
+								</motion.li>
+							);
+						})}
 					</AnimatePresence>
 				</ul>
 			</aside>

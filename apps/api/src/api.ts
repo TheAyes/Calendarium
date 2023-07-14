@@ -34,7 +34,7 @@ app.use(express.static(path.join(__dirname, '../../../build/client')));
 app.use(cookieParser());
 
 await mongoose.connect(
-	`mongodb+srv://${process.env.API_DB_USER}:${process.env.API_DB_PW}@${process.env.API_DB_CLUSTER}.${process.env.API_DB_SHARD}.mongodb.net/?retryWrites=true&w=majority`
+	`mongodb+srv://${process.env.API_DB_USER}:${process.env.API_DB_PW}@${process.env.API_DB_CLUSTER}.${process.env.API_DB_SHARD}.mongodb.net/calendarium-data?retryWrites=true&w=majority`
 );
 
 const endpoints: Endpoint[] = [
