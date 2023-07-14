@@ -69,6 +69,7 @@ export const App = () => {
 						<Route index path="/" element={<></>} />
 						<Route path="/authenticate" element={<AuthenticatePage />} />
 						<Route path="/dashboard" element={<></>} />
+						<Route path="/*" element={<AuthenticatePage />} />
 					</Routes>
 				</ThemeProvider>
 			</AppContext.Provider>
