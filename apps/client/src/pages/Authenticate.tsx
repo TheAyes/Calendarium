@@ -2,6 +2,8 @@ import { FC, FormEvent, useCallback, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CalendariumTheme } from '../types/CalendariumTheme.ts';
+import { Tab, TabContent } from '../types/AuthenticationTypes.ts';
+import { AuthenticationHelper } from '../components/authentication/AuthenticationHelper.tsx';
 
 type AuthenticatePageProps = {
 	[key: string]: unknown;
@@ -144,31 +146,6 @@ const StyledAuthenticatePage = styled('div')`
 			}
 		}
 	}
-
-	& > aside {
-		padding: 1rem;
-
-		width: 240px;
-
-		& > p {
-			padding: 0.5rem 0;
-		}
-
-		& > ul {
-			display: flex;
-			flex-direction: column;
-			gap: 8px;
-
-			& > li {
-				display: flex;
-				align-items: center;
-
-				& > span {
-					padding: 1rem;
-				}
-			}
-		}
-	}
 `;
 
 const mustBeginWithLowerCase = (input: string) => /^[a-z].*$/.test(input);
@@ -184,21 +161,6 @@ const matchWithPreviousPassword = (input: string, formValues: TabContent[]) => {
 	return passwordInput ? passwordInput.value === input : false;
 };
 const isValidEmail = (input: string) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(input);
-
-type FormRule = {
-	description: string;
-	checkFunction: (arg0: string, arg1?: TabContent[]) => boolean;
-};
-type TabContent = {
-	type: string;
-	placeholder?: string;
-	key: string;
-	isFocused: boolean;
-	description?: string;
-	value: string;
-	rules?: FormRule[];
-};
-type Tab = { label: string; content: TabContent[] };
 
 export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 	const [activeTab, setActiveTab] = useState(0);
@@ -408,7 +370,7 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 		const password = ((event.target as HTMLFormElement).elements[3] as HTMLInputElement).value;
 		const confirmPassword = ((event.target as HTMLFormElement).elements[4] as HTMLInputElement).value;
 
-		const invalidFields = await validateUserInput();
+		const invalidFields = validateUserInput();
 		if (invalidFields.length > 0) {
 			// Handle invalid inputs here
 			console.log('Invalid inputs: ', invalidFields);
@@ -480,7 +442,7 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 		[activeTab, tabs]
 	);
 
-	const currentTabContent = useMemo(
+	const currentFocusedInputField = useMemo(
 		() => tabs[activeTab].content.find((currentItem) => currentItem.isFocused),
 		[activeTab, tabs]
 	);
@@ -569,75 +531,11 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 					</AnimatePresence>
 				</form>
 			</main>
-			<aside>
-				<AnimatePresence mode="popLayout">
-					{currentTabContent?.isFocused && (
-						<motion.p
-							initial={{
-								x: 50,
-								opacity: 0,
-							}}
-							animate={{
-								x: 0,
-								opacity: 1,
-							}}
-							exit={{
-								x: 50,
-								opacity: 0,
-							}}
-							transition={{
-								type: 'spring',
-								duration: 0.5,
-								stiffness: 120,
-								damping: 14,
-							}}
-							key={currentTabContent?.key + 'label'}
-						>
-							{currentTabContent?.description}
-						</motion.p>
-					)}
-				</AnimatePresence>
-				<ul>
-					<AnimatePresence mode="popLayout">
-						{currentTabContent?.rules?.map((currentRule, i) => {
-							if (!currentTabContent) {
-								return <></>;
-							}
-							return (
-								<motion.li
-									key={currentRule.description + i}
-									initial={{
-										x: 50,
-										opacity: 0,
-									}}
-									animate={{
-										x: 0,
-										opacity: 1,
-									}}
-									exit={{
-										x: 50,
-										opacity: 0,
-									}}
-									transition={{
-										type: 'spring',
-										duration: 0.5,
-										stiffness: 120,
-										damping: 14,
-										delay: i * 0.05,
-									}}
-								>
-									<span>
-										{currentRule.checkFunction(currentTabContent.value, tabs[activeTab].content)
-											? '✔️'
-											: '❌'}
-									</span>
-									<p>{currentRule.description}</p>
-								</motion.li>
-							);
-						})}
-					</AnimatePresence>
-				</ul>
-			</aside>
+			<AuthenticationHelper
+				tabs={tabs}
+				activeTab={activeTab}
+				currentFocusedInputField={currentFocusedInputField}
+			/>
 		</StyledAuthenticatePage>
 	);
 };
