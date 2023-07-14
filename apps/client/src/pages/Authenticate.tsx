@@ -2,6 +2,7 @@ import { FC, FormEvent, useCallback, useState } from 'react';
 import styled from '@emotion/styled';
 import { AnimatePresence, motion } from 'framer-motion';
 import { CalendariumTheme } from '../types/CalendariumTheme.ts';
+import { useTheme } from '@emotion/react';
 
 type AuthenticatePageProps = {
 	[key: string]: unknown;
@@ -66,71 +67,79 @@ const StyledAuthenticatePage = styled('div')`
 
 			gap: ${(props) => (props.theme as CalendariumTheme).spacing(0.75)};
 
-			& > div {
-				display: flex;
-				flex-direction: column;
+			& > input {
+				flex: 1;
+				padding: 16px;
+				color: ${(props) => (props.theme as CalendariumTheme).layers[0].text?.paragraphColor};
+				font-weight: ${(props) => (props.theme as CalendariumTheme).typography?.h2?.fontWeight};
+				position: relative;
 
-				& > p {
-					display: none;
+				&[type='text'],
+				&[type='password'],
+				&[type='email'] {
+					border-bottom: 2px solid
+						${(props) =>
+							(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default.borderColor};
 
-					&:has(+ input:focus) {
-						display: block;
+					&:hover {
+						border-bottom: 2px solid
+							${(props) =>
+								(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered
+									?.borderColor};
+					}
+
+					&:focus {
+						border-bottom: 2px solid
+							${(props) =>
+								(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused
+									?.borderColor};
 					}
 				}
 
-				& > input {
-					flex: 1;
-					padding: 16px;
-					color: ${(props) => (props.theme as CalendariumTheme).layers[0].text?.paragraphColor};
-					font-weight: ${(props) => (props.theme as CalendariumTheme).typography?.h2?.fontWeight};
-					position: relative;
+				&[type='submit'] {
+					border: 2px solid
+						${(props) =>
+							(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default.borderColor};
 
-					&[type='text'],
-					&[type='password'],
-					&[type='email'] {
-						border-bottom: 2px solid
-							${(props) =>
-								(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default
-									.borderColor};
-
-						&:hover {
-							border-bottom: 2px solid
-								${(props) =>
-									(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered
-										?.borderColor};
-						}
-
-						&:focus {
-							border-bottom: 2px solid
-								${(props) =>
-									(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused
-										?.borderColor};
-						}
-					}
-
-					&[type='submit'] {
+					&:hover {
 						border: 2px solid
 							${(props) =>
-								(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default
-									.borderColor};
-
-						&:hover {
-							border: 2px solid
-								${(props) =>
-									(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered
-										?.borderColor};
-						}
-
-						&:focus {
-							border: 2px solid
-								${(props) =>
-									(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused
-										?.borderColor};
-						}
+								(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered
+									?.borderColor};
 					}
 
-					&::placeholder {
-						color: rgb(120, 120, 180);
+					&:focus {
+						border: 2px solid
+							${(props) =>
+								(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused
+									?.borderColor};
+					}
+				}
+
+				&::placeholder {
+					color: rgb(120, 120, 180);
+				}
+
+				@keyframes shake {
+					10%,
+					90% {
+						transform: translate3d(-2px, 0, 0);
+					}
+
+					20%,
+					80% {
+						transform: translate3d(2px, 0, 0);
+					}
+
+					30%,
+					50%,
+					70% {
+						transform: translate3d(-4px, 0, 0);
+					}
+
+					40%,
+					60% {
+						transform: translate3d(4px, 0, 0);
 					}
 				}
 			}
@@ -194,6 +203,7 @@ type Tab = { label: string; content: TabContent[] };
 
 export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 	const [activeTab, setActiveTab] = useState(0);
+	const [validState, setValidState] = useState<Record<string, boolean>>({});
 
 	const [tabs, setTabs] = useState([
 		{
@@ -336,10 +346,38 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 		},
 	] as Tab[]);
 
+	const validateUserInput = async () => {
+		const tabContent = tabs[activeTab].content;
+		let invalidFields: string[] = [];
+
+		tabContent.forEach((item) => {
+			item.rules?.forEach((rule) => {
+				const isValid = rule.checkFunction(item.value, tabContent);
+				if (!isValid) invalidFields.push(item.key);
+			});
+		});
+
+		let newValidState = {};
+		tabContent.forEach((item) => {
+			//@ts-ignore
+			newValidState[item.key] = !invalidFields.includes(item.key);
+		});
+		setValidState(newValidState);
+
+		return invalidFields;
+	};
+
 	const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const userId = ((event.target as HTMLFormElement).elements[0] as HTMLInputElement).value;
 		const password = ((event.target as HTMLFormElement).elements[1] as HTMLInputElement).value;
+
+		const invalidFields = await validateUserInput();
+		if (invalidFields.length > 0) {
+			// Handle invalid inputs here
+			console.log('Invalid inputs: ', invalidFields);
+			return;
+		}
 
 		console.table([userId, password]);
 	};
@@ -352,6 +390,13 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 		const email = ((event.target as HTMLFormElement).elements[2] as HTMLInputElement).value;
 		const password = ((event.target as HTMLFormElement).elements[3] as HTMLInputElement).value;
 		const confirmPassword = ((event.target as HTMLFormElement).elements[4] as HTMLInputElement).value;
+
+		const invalidFields = await validateUserInput();
+		if (invalidFields.length > 0) {
+			// Handle invalid inputs here
+			console.log('Invalid inputs: ', invalidFields);
+			return;
+		}
 
 		console.table([displayName, userId, email, password, confirmPassword]);
 	};
@@ -394,6 +439,8 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 
 	const handleInput = useCallback(
 		(key: string, value: string) => {
+			setValidState({});
+
 			let newTabs = [...tabs];
 			newTabs = newTabs.map((tab, index) =>
 				index !== activeTab
@@ -414,6 +461,8 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 		},
 		[activeTab, tabs]
 	);
+
+	const currentTheme = useTheme();
 
 	return (
 		<StyledAuthenticatePage {...props}>
@@ -457,7 +506,7 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 					<AnimatePresence mode="popLayout">
 						{tabs[activeTab].content.map((currentItem, index) => {
 							return (
-								<motion.div
+								<motion.input
 									key={currentItem.key}
 									layout
 									initial={{
@@ -481,15 +530,19 @@ export const AuthenticatePage: FC<AuthenticatePageProps> = ({ ...props }) => {
 										stiffness: 120,
 										damping: 14,
 									}}
-								>
-									<motion.input
-										type={currentItem.type}
-										placeholder={currentItem.placeholder}
-										onFocus={() => handleFocus(currentItem.key)}
-										onBlur={() => handleBlur(currentItem.key)}
-										onChange={(event) => handleInput(currentItem.key, event.target.value)}
-									/>
-								</motion.div>
+									style={{
+										border: validState[currentItem.key] === false ? '2px solid red' : undefined,
+										animation:
+											validState[currentItem.key] === false
+												? 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both'
+												: undefined,
+									}}
+									type={currentItem.type}
+									placeholder={currentItem.placeholder}
+									onFocus={() => handleFocus(currentItem.key)}
+									onBlur={() => handleBlur(currentItem.key)}
+									onChange={(event) => handleInput(currentItem.key, event.target.value)}
+								/>
 							);
 						})}
 					</AnimatePresence>
