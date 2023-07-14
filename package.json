@@ -1,6 +1,7 @@
 {
 	"name": "calendarium",
 	"version": "1.0.0",
+	"type": "module",
 	"scripts": {
 		"dev": "pnpm run --parallel --if-present start",
 		"build": "pnpm run --parallel --if-present build"
