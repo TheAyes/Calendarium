@@ -1,10 +1,12 @@
-import { FC, useMemo, useState } from 'react';
+import { FC, useContext, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
-import { AnimatePresence, motion } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { CalendariumTheme } from '../types/CalendariumTheme.ts';
 import { Tab, TabContent } from '../types/AuthenticationTypes.ts';
 import { AuthenticationHelper } from '../components/authentication/AuthenticationHelper.tsx';
 import { AuthenticationForm } from '../components/authentication/AuthenticationForm.tsx';
+import { AppContext } from '../App.tsx';
+import { translations } from '../localization/translations.ts';
 
 type AuthenticatePageProps = {
 	[key: string]: unknown;
@@ -69,160 +71,178 @@ const isValidLength = (input: string) => input.length >= 3 && input.length <= 30
 const containsLowerCase = (input: string) => /[a-z]/.test(input);
 const containsUpperCase = (input: string) => /[A-Z]/.test(input);
 const containsDigit = (input: string) => /\d/.test(input);
-const containsSpecialCharacter = (input: string) => /[@$!%*?&]/.test(input);
+const containsSpecialCharacter = (input: string) => /[@$!%*?&_+.,-]/.test(input);
 const isMinimumLength = (input: string) => input.length >= 8;
 const matchWithPreviousPassword = (input: string, formValues: TabContent[]) => {
 	const passwordInput = formValues?.find((item) => item.key === 'passwordInput');
 	return passwordInput ? passwordInput.value === input : false;
 };
 const isValidEmail = (input: string) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(input);
+const specialPasswordCharacters = '[ @, $, !, %, *, ?, &, -, _, +, ., , ]';
 
 export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 	const [activeTab, setActiveTab] = useState(0);
 
+	const appState = useContext(AppContext);
+
 	const [tabs, setTabs] = useState([
 		{
-			label: 'Login',
+			label: translations[appState.get?.language].login.label,
 			content: [
 				{
 					type: 'text',
-					placeholder: 'User ID',
+					placeholder: translations[appState.get.language].login.content.userId.placeholder,
 					key: 'userIdInput',
 					isFocused: false,
-					description: 'Enter your user-id.',
+					description: translations[appState.get.language].login.content.userId.description,
 					value: '',
-					rules: [],
+					rules: []
 				},
 				{
 					type: 'password',
-					placeholder: 'Password',
+					placeholder: translations[appState.get.language].login.content.password.placeholder,
 					key: 'passwordInput',
 					isFocused: false,
-					description: 'Enter your password.',
-					value: '',
+					description: translations[appState.get.language].login.content.password.description,
+					value: ''
 				},
 				{
 					type: 'submit',
-					placeholder: 'Submit',
+					placeholder: translations[appState.get.language].login.content.submit.placeholder,
 					key: 'submitInput',
 					isFocused: false,
-					description: '',
-					value: '',
-				},
-			],
+					description: translations[appState.get.language].login.content.submit.description,
+					value: ''
+				}
+			]
 		},
 		{
-			label: 'Register',
+			label: translations[appState.get.language].register.label,
 			content: [
 				{
 					type: 'text',
-					placeholder: 'Display Name',
+					placeholder: translations[appState.get.language].register.content.displayName.placeholder,
 					key: 'displayNameInput',
 					isFocused: false,
-					description: 'Enter your desired display name:',
+					description: translations[appState.get.language].register.content.displayName.description,
 					value: '',
 					rules: [
 						{
-							description: 'Must start with a letter.',
-							checkFunction: (input) => /^[a-zA-z].*$/.test(input),
-						},
-					],
+							description:
+							translations[appState.get.language].register.content.displayName.rules?.[0].description,
+							checkFunction: (input) => /^[a-zA-z].*$/.test(input)
+						}
+					]
 				},
 				{
 					type: 'text',
-					placeholder: 'User ID',
+					placeholder: translations[appState.get.language].register.content.userId.placeholder,
 					key: 'userIdInput',
 					isFocused: false,
-					description: 'Enter your user ID:',
+					description: translations[appState.get.language].register.content.userId.description,
 					value: '',
 					rules: [
 						{
-							description: 'Must begin with a lowercase letter.',
-							checkFunction: (input) => mustBeginWithLowerCase(input),
+							description:
+							translations[appState.get.language].register.content.userId.rules?.[0].description,
+							checkFunction: (input) => mustBeginWithLowerCase(input)
 						},
 						{
-							description: 'Can contain lowercase letters, numbers, underscores, and hyphens.',
-							checkFunction: (input) => canContainLettersNumbersUnderscoresHyphens(input),
+							description:
+							translations[appState.get.language].register.content.userId.rules?.[1].description,
+							checkFunction: (input) => canContainLettersNumbersUnderscoresHyphens(input)
 						},
 						{
-							description: 'Must be at least 3 characters and not exceed 30 characters in length.',
-							checkFunction: (input) => isValidLength(input),
-						},
-					],
+							description:
+							translations[appState.get.language].register.content.userId.rules?.[2].description,
+							checkFunction: (input) => isValidLength(input)
+						}
+					]
 				},
 				{
 					type: 'email',
-					placeholder: 'Email',
+					placeholder: translations[appState.get.language].register.content.email.placeholder,
 					key: 'emailInput',
 					isFocused: false,
-					description: 'Enter your email:',
+					description: translations[appState.get.language].register.content.email.description,
 					value: '',
 					rules: [
 						{
-							description: 'Must be a valid email.',
-							checkFunction: (input) => isValidEmail(input),
-						},
-					],
+							description:
+							translations[appState.get.language].register.content.email.rules?.[0].description,
+							checkFunction: (input) => isValidEmail(input)
+						}
+					]
 				},
 				{
 					type: 'password',
-					placeholder: 'Password',
+					placeholder: translations[appState.get.language].register.content.password.placeholder,
 					key: 'passwordInput',
 					isFocused: false,
-					description: 'Enter your password:',
+					description: translations[appState.get.language].register.content.password.description,
 					value: '',
 					rules: [
 						{
-							description: 'Must contain at least one lowercase letter.',
-							checkFunction: (input) => containsLowerCase(input),
+							description:
+							translations[appState.get.language].register.content.password.rules?.[0].description,
+							checkFunction: (input) => containsLowerCase(input)
 						},
 						{
-							description: 'Must contain at least one uppercase letter.',
-							checkFunction: (input) => containsUpperCase(input),
+							description:
+							translations[appState.get.language].register.content.password.rules?.[1].description,
+							checkFunction: (input) => containsUpperCase(input)
 						},
 						{
-							description: 'Must contain at least one digit.',
-							checkFunction: (input) => containsDigit(input),
+							description:
+							translations[appState.get.language].register.content.password.rules?.[2].description,
+							checkFunction: (input) => containsDigit(input)
 						},
 						{
-							description: 'Must contain at least one special character (@, $, !, %, *, ?, &).',
+							description:
+							translations[appState.get.language].register.content.password.rules?.[3].description,
 							checkFunction: (input) => containsSpecialCharacter(input),
+							additionalData: specialPasswordCharacters
 						},
 						{
-							description: 'Must be at least 8 characters in length.',
-							checkFunction: (input) => isMinimumLength(input),
-						},
-					],
+							description:
+							translations[appState.get.language].register.content.password.rules?.[4].description,
+							checkFunction: (input) => isMinimumLength(input)
+						}
+					]
 				},
 				{
 					type: 'password',
-					placeholder: 'Confirm Password',
+					placeholder: translations[appState.get.language].register.content.confirmPassword.placeholder,
 					key: 'confirmPasswordInput',
 					isFocused: false,
-					description: 'Please confirm your password:',
+					description: translations[appState.get.language].register.content.confirmPassword.description,
 					value: '',
 					rules: [
 						{
-							description: 'Must not be empty.',
-							checkFunction: (input) => !!input,
+							description:
+							translations[appState.get.language].register.content.confirmPassword.rules?.[0]
+								.description,
+							checkFunction: (input) => !!input
 						},
 						{
-							description: 'Must match with previous password.',
+							description:
+							translations[appState.get.language].register.content.confirmPassword.rules?.[1]
+								.description,
 							checkFunction: (input, formValues): boolean =>
-								matchWithPreviousPassword(input, formValues!),
-						},
-					],
+								matchWithPreviousPassword(input, formValues!)
+						}
+					]
 				},
 				{
 					type: 'submit',
-					placeholder: 'Submit',
+					placeholder: translations[appState.get.language].register.content.submit.placeholder,
 					key: 'submitInput',
 					isFocused: false,
-					description: '',
-					value: '',
-				},
-			],
-		},
+					description: translations[appState.get.language].register.content.submit.description,
+					value: ''
+				}
+			]
+		}
 	] as Tab[]);
 
 	const handleBlurAll = () => {
@@ -230,9 +250,9 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 			index !== activeTab
 				? tab
 				: {
-						...tab,
-						content: tab.content.map((item) => ({ ...item, isFocused: false })),
-				  }
+					...tab,
+					content: tab.content.map((item) => ({ ...item, isFocused: false }))
+				}
 		);
 		setTabs(newTabs);
 	};
@@ -246,42 +266,41 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 		<StyledAuthenticatePage {...props}>
 			<main>
 				<ul>
-					<AnimatePresence mode="popLayout">
-						{tabs.map((item, index) => (
-							<motion.li
-								className={activeTab === index ? 'active' : ''}
-								layoutId={item.label}
-								initial={{
-									y: -100,
-								}}
-								animate={{
-									y: 0,
-									transition: {
-										delay: index * 0.1,
-										type: 'spring',
-										duration: 1,
-										stiffness: 120,
-										damping: 14,
-									},
-								}}
-								exit={{
-									y: -100,
-								}}
-								key={item.label}
-								onClick={() => {
-									handleBlurAll();
-									setActiveTab(index);
-								}}
-							>
-								<p>{item.label}</p>
+					{tabs.map((item, index) => (
+						<motion.li
+							className={activeTab === index ? 'active' : ''}
+							layoutId={item.label}
+							initial={{
+								y: -100
+							}}
+							animate={{
+								y: 0,
+								transition: {
+									delay: index * 0.1,
+									type: 'spring',
+									duration: 1,
+									stiffness: 120,
+									damping: 14
+								}
+							}}
+							exit={{
+								y: -100
+							}}
+							key={item.label}
+							onClick={() => {
+								handleBlurAll();
+								setActiveTab(index);
+							}}
+						>
+							<p>{item.label}</p>
 
-								{activeTab === index && <motion.div layoutId="underline" />}
-							</motion.li>
-						))}
-					</AnimatePresence>
+							{activeTab === index && <motion.div layoutId='underline' />}
+						</motion.li>
+					))}
 				</ul>
 				<AuthenticationForm tabs={tabs} activeTab={activeTab} setTabs={setTabs} />
 			</main>
+
 			<AuthenticationHelper
 				tabs={tabs}
 				activeTab={activeTab}

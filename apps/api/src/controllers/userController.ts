@@ -1,12 +1,20 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { User } from '../models/User.ts';
 import process from 'process';
 import bcrypt from 'bcrypt';
-import { generateToken, refreshToken } from 'jwt-authorize';
+import { authenticate, generateToken, refreshToken } from 'jwt-authorize';
 
 const userIdPattern = /^[a-z][a-z0-9_-]{2,29}$/;
 const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_+.,-])[A-Za-z\d@$!%*?&_+.,-]{8,}$/;
+
+declare global {
+	namespace Express {
+		interface Request {
+			user?: any;
+		}
+	}
+}
 
 const errorResponse = (res: Response, status: number, error: unknown) => {
 	if (error instanceof Error) {
@@ -24,30 +32,31 @@ const errorResponse = (res: Response, status: number, error: unknown) => {
 	}
 };
 
-export const doesUserExist = async (username = '') => {
-	const foundUser = await User.findOne({ username }).exec();
+export const doesUserExist = async (userId = '', email = '') => {
+	const foundUsername = await User.findOne({ userId: userId }).exec();
+	const foundEmail = await User.findOne({ email: email });
 
-	return !!foundUser;
+	return !!foundUsername || foundEmail;
 };
 
 export const loginUser = async (req: Request, res: Response) => {
-	const { username, password } = req.body;
+	const { userId, password } = req.body;
 
-	if (!userIdPattern.test(username)) {
+	if (!userIdPattern.test(userId)) {
 		return res.status(400).json({
 			accessToken: null,
 			refreshToken: null,
-			error: 'Invalid username',
+			error: 'Invalid userId',
 		});
 	}
 
 	try {
-		const foundUser = await User.findOne({ username }).exec();
+		const foundUser = await User.findOne({ userId: userId }).exec();
 		if (!foundUser) {
 			return res.status(401).json({
 				accessToken: null,
 				refreshToken: null,
-				error: 'Invalid username or password',
+				error: 'Invalid userId or password',
 			});
 		}
 
@@ -57,20 +66,23 @@ export const loginUser = async (req: Request, res: Response) => {
 				accessToken: null,
 				refreshToken: null,
 				user: null,
-				error: 'Invalid username or password',
+				error: 'Invalid userId or password',
 			});
 		}
 
+		const refreshSecret = process.env.API_JWT_REFRESH_SECRET;
+		const jwtSecret = process.env.API_JWT_SECRET;
+
 		const result = generateToken(
 			{
-				payload: { userid: foundUser._id, hashedPassword: foundUser.password },
-				secret: process.env.JWT_SECRET!,
-				options: { expiresIn: process.env.API_JWT_EXPIRY || '10m' },
+				payload: { userId: foundUser._id },
+				secret: jwtSecret!,
+				options: { expiresIn: '10m' },
 			},
 			{
-				payload: { userid: foundUser._id, hashedPassword: foundUser.password },
-				secret: process.env.JWT_REFRESH_SECRET!,
-				options: { expiresIn: process.env.API_JWT_REFRESH_EXPIRY || '7d' },
+				payload: { userId: foundUser._id },
+				secret: refreshSecret!,
+				options: { expiresIn: '7d' },
 			}
 		);
 
@@ -112,7 +124,7 @@ export const registerUser = async (req: Request, res: Response) => {
 	}
 
 	try {
-		if (await doesUserExist(userId)) {
+		if (await doesUserExist(userId, email)) {
 			return res.status(409).json({
 				accessToken: null,
 				refreshToken: null,
@@ -130,17 +142,21 @@ export const registerUser = async (req: Request, res: Response) => {
 			password: hashedPassword,
 		});
 
-		const savedUser = user; // await user.save();
+		const savedUser = await user.save();
+
+		const refreshSecret = process.env.API_JWT_REFRESH_SECRET;
+
+		const jwtSecret = process.env.API_JWT_SECRET;
 
 		const result = generateToken(
 			{
-				payload: { userid: savedUser._id, hashedPassword: hashedPassword },
-				secret: process.env.JWT_SECRET!,
+				payload: { userId: savedUser._id },
+				secret: jwtSecret!,
 				options: { expiresIn: '10m' },
 			},
 			{
-				payload: { userid: savedUser._id, hashedPassword: hashedPassword },
-				secret: process.env.JWT_REFRESH_SECRET!,
+				payload: { userId: savedUser._id },
+				secret: refreshSecret!,
 				options: { expiresIn: '7d' },
 			}
 		);
@@ -156,14 +172,14 @@ export const registerUser = async (req: Request, res: Response) => {
 };
 export const refreshUser = async (req: Request, res: Response) => {
 	try {
-		const authHeader = req.get('Authorization') || req.get('authorization');
-		const token = authHeader && authHeader.split(' ')[1];
+		const token = req.cookies.refreshToken;
 		if (!token) {
 			return res.status(401).json({ error: 'Token is required' });
 		}
 
-		const refreshSecret = process.env.JWT_REFRESH_SECRET;
-		const jwtSecret = process.env.JWT_SECRET;
+		const refreshSecret = process.env.API_JWT_REFRESH_SECRET;
+
+		const jwtSecret = process.env.API_JWT_SECRET;
 
 		if (!refreshSecret || !jwtSecret) {
 			return res.status(500).json({ error: 'Server configuration error' });
@@ -182,5 +198,33 @@ export const refreshUser = async (req: Request, res: Response) => {
 		}
 	} catch (err: unknown) {
 		return errorResponse(res, 500, err);
+	}
+};
+
+export const authenticateUser = async (req: Request, res: Response, next: NextFunction) => {
+	try {
+		const accessToken = req.cookies.accessToken;
+		if (!accessToken) {
+			res.status(401).json({ error: 'Unauthorized' });
+		}
+
+		const result = authenticate({ accessToken: accessToken }, process.env.API_JWT_SECRET || '');
+		if (result.status !== 200) {
+			res.status(result.status!).json({ error: 'Unauthorized' });
+		}
+
+		req.user = await User.findById(result.payload?.userId).select('-password');
+		console.log(req.user);
+		next();
+	} catch (error) {
+		res.status(500).json({ error: error });
+	}
+};
+
+export const getUserData = async (req: Request, res: Response) => {
+	try {
+		res.json(req.user);
+	} catch (error) {
+		res.status(500).json({ error: error });
 	}
 };

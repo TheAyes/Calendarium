@@ -1,5 +1,5 @@
 import process from 'process';
-import express, { Request, Response } from 'express';
+import express, { Application, Request, Response } from 'express';
 import { Endpoint, ValidationSchema } from './types/types';
 import { validateRequest } from './controllers/requestController.ts';
 import * as path from 'path';
@@ -9,7 +9,7 @@ import cookieParser from 'cookie-parser';
 import Joi from 'joi';
 import { config } from 'dotenv';
 import mongoose from 'mongoose';
-import { loginUser, refreshUser, registerUser } from './controllers/userController.ts';
+import { authenticateUser, getUserData, loginUser, refreshUser, registerUser } from './controllers/userController.ts';
 
 config({ path: '../../.env' });
 
@@ -31,6 +31,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 app.use(express.static(path.join(__dirname, '../../../build/client')));
+app.use(express.json());
 app.use(cookieParser());
 
 await mongoose.connect(
@@ -55,7 +56,7 @@ const endpoints: Endpoint[] = [
 		path: '/api/login',
 		middlewares: [],
 		expectedBody: Joi.object({
-			username: Joi.string().required(),
+			userId: Joi.string().required(),
 			password: Joi.string().required(),
 		}),
 		function: (req: Request, res: Response) => loginUser(req, res),
@@ -65,10 +66,10 @@ const endpoints: Endpoint[] = [
 		path: '/api/register',
 		middlewares: [],
 		expectedBody: Joi.object({
-			username: Joi.string().required(),
+			displayName: Joi.string().required(),
+			userId: Joi.string().required(),
 			email: Joi.string().required(),
 			password: Joi.string().required(),
-			confirmPassword: Joi.string().required(),
 		}),
 		function: async (req: Request, res: Response) => registerUser(req, res),
 	},
@@ -76,10 +77,13 @@ const endpoints: Endpoint[] = [
 		method: 'post',
 		path: '/api/refresh',
 		middlewares: [],
-		expectedHeaders: Joi.object({
-			Authorization: Joi.string().required(),
-		}),
 		function: async (req: Request, res: Response) => refreshUser(req, res),
+	},
+	{
+		method: 'get',
+		path: '/api/user',
+		middlewares: [authenticateUser],
+		function: async (req: Request, res: Response) => getUserData(req, res),
 	},
 	{
 		method: 'get',
@@ -97,8 +101,12 @@ endpoints.forEach((endpoint) => {
 		{ schema: endpoint.expectedUrlParams, source: 'params' },
 		{ schema: endpoint.expectedHeaders, source: 'headers' },
 	];
-	const middleware = validateRequest(...validationSchemas);
-	app[endpoint.method](endpoint.path, middleware, endpoint.function);
+	const validatedRequestMiddleware = validateRequest(...validationSchemas);
+
+	const middlewares = endpoint.middlewares || [];
+	middlewares.push(validatedRequestMiddleware);
+
+	app[endpoint.method as keyof Application](endpoint.path, middlewares, endpoint.function);
 });
 
 app.listen(port, () => {

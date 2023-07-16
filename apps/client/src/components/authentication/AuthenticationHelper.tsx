@@ -7,7 +7,7 @@ import { Tab, TabContent } from '../../types/AuthenticationTypes.ts';
 const StyledAuthenticationHelper = styled('aside')`
 	padding: 1rem;
 
-	width: 240px;
+	width: 340px;
 `;
 
 type AuthenticationHelperProps = {

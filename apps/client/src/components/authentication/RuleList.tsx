@@ -61,7 +61,10 @@ export const RuleList: React.FC<RuleListProps> = ({ currentFocusedInputField, ta
 									? '✔️'
 									: '❌'}
 							</span>
-							<p>{currentRule.description}</p>
+							<div>
+								<p>{currentRule.description}</p>
+								{currentRule.additionalData && <p>{currentRule.additionalData}</p>}
+							</div>
 						</motion.li>
 					);
 				})}

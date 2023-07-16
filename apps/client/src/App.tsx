@@ -1,13 +1,26 @@
 import { GlobalStyles } from './GlobalStyles.tsx';
 import { ThemeProvider } from '@emotion/react';
-import { createContext, useEffect, useState } from 'react';
+import { createContext, Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
 import { darkTheme } from './themes/darkTheme.ts';
 import { AuthenticationPage } from './pages/AuthenticationPage.tsx';
 import axios from 'axios';
 import { useCookies } from 'react-cookie';
+import { AppState } from './types/AppState.ts';
+import { CalendariumTheme } from './types/CalendariumTheme.ts';
 
-const AppContext = createContext({});
+type AppContextType = {
+	get: {
+		theme: CalendariumTheme;
+		language: string;
+		userState: {
+			accessToken: string;
+			refreshToken: string;
+		};
+	};
+	set: Dispatch<SetStateAction<AppState>>;
+};
+export const AppContext = createContext({} as AppContextType);
 
 export const App = () => {
 	const location = useLocation();
@@ -17,52 +30,54 @@ export const App = () => {
 
 	const [appState, setAppState] = useState({
 		theme: darkTheme,
+		language: 'en',
 		userState: {
 			accessToken: cookies.accessToken || '',
 			refreshToken: cookies.refreshToken || '',
 		},
-	});
+	} as AppState);
 
 	useEffect(() => {
-		if (!appState.userState.accessToken) {
-			if (!appState.userState.refreshToken) {
-				navigate('/authenticate');
-			} else {
-				(async () => {
-					try {
-						const response = await axios.post(
-							`/api/refresh`,
-							{},
-							{
-								headers: {
-									Authorization: `Bearer ${cookies.refreshToken}`,
-								},
-							}
-						);
-						const refreshTokenExpiryDate = new Date();
-						refreshTokenExpiryDate.setDate(refreshTokenExpiryDate.getDate() + 7);
+		if (appState.userState.refreshToken) {
+			(async () => {
+				try {
+					const response = await axios.post(
+						`/api/refresh`,
+						{},
+						{
+							headers: {
+								authorization: `Bearer ${cookies.refreshToken}`,
+								language: appState.language,
+							},
+						}
+					);
+					const refreshTokenExpiryDate = new Date();
+					refreshTokenExpiryDate.setDate(refreshTokenExpiryDate.getDate() + 7);
 
-						const accessTokenExpiryDate = new Date();
-						accessTokenExpiryDate.setDate(accessTokenExpiryDate.getMinutes() + 10);
+					const accessTokenExpiryDate = new Date();
+					accessTokenExpiryDate.setDate(accessTokenExpiryDate.getMinutes() + 10);
 
-						setCookie('refreshToken', response.data.refreshToken, {
-							path: '/',
-							expires: refreshTokenExpiryDate,
-						});
-						setCookie('accessToken', response.data.accessToken, {
-							path: '/',
-							expires: accessTokenExpiryDate,
-						});
-					} catch (error) {
-						console.error(error);
-					}
-				})();
-			}
+					setCookie('refreshToken', response.data.refreshToken, {
+						path: '/',
+						expires: refreshTokenExpiryDate,
+					});
+					setCookie('accessToken', response.data.accessToken, {
+						path: '/',
+						expires: accessTokenExpiryDate,
+					});
+				} catch (error) {
+					console.warn('Refreshing failed with error: ', error.response.data);
+				}
+			})();
+		}
+		if (!appState.userState.accessToken && !appState.userState.refreshToken) {
+			navigate('/authenticate');
+			return;
 		}
 	}, [location.pathname]);
 	return (
 		<>
-			<AppContext.Provider value={{ appState, setAppState }}>
+			<AppContext.Provider value={{ get: appState, set: setAppState }}>
 				<ThemeProvider theme={appState.theme}>
 					<GlobalStyles />
 					<Routes>

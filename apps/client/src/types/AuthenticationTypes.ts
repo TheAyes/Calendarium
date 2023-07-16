@@ -1,6 +1,7 @@
 export type FormRule = {
 	description: string;
 	checkFunction: (arg0: string, arg1?: TabContent[]) => boolean;
+	additionalData?: string;
 };
 export type TabContent = {
 	type: string;

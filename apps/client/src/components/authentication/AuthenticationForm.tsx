@@ -1,8 +1,11 @@
-import React, { Dispatch, FormEvent, SetStateAction, useCallback, useState } from 'react';
+import React, { Dispatch, FormEvent, SetStateAction, useCallback, useContext, useState } from 'react';
 import styled from '@emotion/styled';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Tab } from '../../types/AuthenticationTypes.ts';
 import { CalendariumTheme } from '../../types/CalendariumTheme.ts';
+import { useCookies } from 'react-cookie';
+import { AppContext } from '../../App.tsx';
+import axios from 'axios';
 
 const StyledAuthenticationForm = styled('form')`
 	grid-column: 1/2;
@@ -22,36 +25,30 @@ const StyledAuthenticationForm = styled('form')`
 		&[type='text'],
 		&[type='password'],
 		&[type='email'] {
-			border-bottom: 2px solid
-				${(props) => (props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default.borderColor};
+			border-bottom: 2px solid ${(props) => (props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default.borderColor};
 
 			&:hover {
-				border-bottom: 2px solid
-					${(props) =>
-						(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered?.borderColor};
+				border-bottom: 2px solid ${(props) =>
+					(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered?.borderColor};
 			}
 
 			&:focus {
-				border-bottom: 2px solid
-					${(props) =>
-						(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused?.borderColor};
+				border-bottom: 2px solid ${(props) =>
+					(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused?.borderColor};
 			}
 		}
 
 		&[type='submit'] {
-			border: 2px solid
-				${(props) => (props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default.borderColor};
+			border: 2px solid ${(props) => (props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default.borderColor};
 
 			&:hover {
-				border: 2px solid
-					${(props) =>
-						(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered?.borderColor};
+				border: 2px solid ${(props) =>
+					(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered?.borderColor};
 			}
 
 			&:focus {
-				border: 2px solid
-					${(props) =>
-						(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused?.borderColor};
+				border: 2px solid ${(props) =>
+					(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused?.borderColor};
 			}
 		}
 
@@ -82,6 +79,11 @@ const StyledAuthenticationForm = styled('form')`
 			}
 		}
 	}
+
+	& > p {
+		text-align: center;
+		color: red;
+	}
 `;
 
 type AuthenticationFormProps = {
@@ -93,6 +95,10 @@ type AuthenticationFormProps = {
 
 export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, activeTab, setTabs, ...props }) => {
 	const [validState, setValidState] = useState<Record<string, boolean>>({});
+	const [authError, setAuthError] = useState('');
+	const [_, setCookie] = useCookies(['accessToken', 'refreshToken']);
+
+	const appState = useContext(AppContext);
 
 	const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -101,12 +107,56 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 
 		const invalidFields = validateUserInput();
 		if (invalidFields.length > 0) {
-			// Handle invalid inputs here
-			console.log('Invalid inputs: ', invalidFields);
 			return;
 		}
+		try {
+			const response = await axios.post(
+				'/api/login',
+				{
+					userId: userId,
+					password: password
+				},
+				{
+					headers: {
+						language: appState.get.language
+					}
+				}
+			);
 
-		console.table([userId, password]);
+			const refreshTokenExpiryDate = new Date();
+			refreshTokenExpiryDate.setDate(refreshTokenExpiryDate.getDate() + 7);
+
+			const accessTokenExpiryDate = new Date();
+			accessTokenExpiryDate.setDate(accessTokenExpiryDate.getMinutes() + 10);
+
+			setCookie('refreshToken', response.data.refreshToken, {
+				path: '/',
+				expires: refreshTokenExpiryDate
+			});
+			setCookie('accessToken', response.data.accessToken, {
+				path: '/',
+				expires: accessTokenExpiryDate
+			});
+
+			appState.set((prevState) => {
+				return {
+					...prevState,
+					userState: {
+						accessToken: response.data.accessToken,
+						refreshToken: response.data.refreshToken
+					}
+				};
+			});
+
+			console.table({
+				status: response.status,
+				accessToken: response.data.accessToken,
+				refreshToken: response.data.refreshToken
+			});
+		} catch (error: any) {
+			console.error(error);
+			setAuthError(error.response.data.error);
+		}
 	};
 
 	const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
@@ -116,7 +166,7 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 		const userId = ((event.target as HTMLFormElement).elements[1] as HTMLInputElement).value;
 		const email = ((event.target as HTMLFormElement).elements[2] as HTMLInputElement).value;
 		const password = ((event.target as HTMLFormElement).elements[3] as HTMLInputElement).value;
-		const confirmPassword = ((event.target as HTMLFormElement).elements[4] as HTMLInputElement).value;
+		//const confirmPassword = ((event.target as HTMLFormElement).elements[4] as HTMLInputElement).value;
 
 		const invalidFields = validateUserInput();
 		if (invalidFields.length > 0) {
@@ -125,7 +175,51 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 			return;
 		}
 
-		console.table([displayName, userId, email, password, confirmPassword]);
+		const response = await axios.post(
+			'/api/register',
+			{
+				displayName: displayName,
+				userId: userId,
+				email: email,
+				password: password
+			},
+			{
+				headers: {
+					language: appState.get.language
+				}
+			}
+		);
+
+		const refreshTokenExpiryDate = new Date();
+		refreshTokenExpiryDate.setDate(refreshTokenExpiryDate.getDate() + 7);
+
+		const accessTokenExpiryDate = new Date();
+		accessTokenExpiryDate.setDate(accessTokenExpiryDate.getMinutes() + 10);
+
+		setCookie('refreshToken', response.data.refreshToken, {
+			path: '/',
+			expires: refreshTokenExpiryDate
+		});
+		setCookie('accessToken', response.data.accessToken, {
+			path: '/',
+			expires: accessTokenExpiryDate
+		});
+
+		appState.set((prevState) => {
+			return {
+				...prevState,
+				userState: {
+					accessToken: response.data.accessToken,
+					refreshToken: response.data.refreshToken
+				}
+			};
+		});
+
+		console.table({
+			status: response.status,
+			accessToken: response.data.accessToken,
+			refreshToken: response.data.refreshToken
+		});
 	};
 
 	const handleFocus = (key: string) => {
@@ -133,9 +227,9 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 			index !== activeTab
 				? tab
 				: {
-						...tab,
-						content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: true } : item)),
-				  }
+					...tab,
+					content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: true } : item))
+				}
 		);
 		setTabs(newTabs);
 	};
@@ -145,9 +239,9 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 			index !== activeTab
 				? tab
 				: {
-						...tab,
-						content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: false } : item)),
-				  }
+					...tab,
+					content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: false } : item))
+				}
 		);
 		setTabs(newTabs);
 	};
@@ -186,7 +280,6 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 			}
 
 			setValidState(validState);
-			console.log(invalidFields);
 			return invalidFields;
 		},
 		[tabs, activeTab]
@@ -201,9 +294,9 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 				index !== activeTab
 					? tab
 					: {
-							...tab,
-							content: tab.content.map((item) => (item.key === key ? { ...item, value } : item)),
-					  }
+						...tab,
+						content: tab.content.map((item) => (item.key === key ? { ...item, value } : item))
+					}
 			);
 
 			newTabs[activeTab].content.forEach((item) => {
@@ -213,55 +306,61 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 			});
 
 			setTabs(newTabs);
-			validateUserInput(key, value, activeTab);
 		},
 		[activeTab, tabs]
 	);
 
 	return (
 		<StyledAuthenticationForm onSubmit={[handleLogin, handleRegister][activeTab]} {...props}>
-			<AnimatePresence mode="popLayout">
+			<AnimatePresence mode='popLayout'>
 				{tabs[activeTab].content.map((currentItem, index) => {
 					return (
 						<motion.input
 							key={currentItem.key}
+							value={currentItem.type === 'submit' ? currentItem.placeholder : undefined}
 							layout
 							initial={{
 								opacity: 0,
-								x: 100,
+								x: 100
 							}}
 							animate={{
 								opacity: 1,
 								x: 0,
 								transition: {
-									delay: index * 0.1 + 0.2,
-								},
+									delay: index * 0.1 + 0.2
+								}
 							}}
 							exit={{
 								opacity: 0,
-								x: -100,
+								x: -100
 							}}
 							transition={{
 								type: 'spring',
 								duration: 0.5,
 								stiffness: 120,
-								damping: 14,
+								damping: 14
 							}}
 							style={{
 								border: validState[currentItem.key] === false ? '2px solid red' : undefined,
 								animation:
 									validState[currentItem.key] === false
 										? 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both'
-										: undefined,
+										: undefined
 							}}
 							type={currentItem.type}
 							placeholder={currentItem.placeholder}
 							onFocus={() => handleFocus(currentItem.key)}
-							onBlur={() => handleBlur(currentItem.key)}
-							onChange={(event) => handleInput(currentItem.key, event.target.value)}
+							onBlur={() => {
+								validateUserInput(currentItem.key, currentItem.value, activeTab);
+								handleBlur(currentItem.key);
+							}}
+							onChange={(event) => {
+								handleInput(currentItem.key, event.target.value);
+							}}
 						/>
 					);
 				})}
+				{authError && <motion.p>{authError}</motion.p>}
 			</AnimatePresence>
 		</StyledAuthenticationForm>
 	);
