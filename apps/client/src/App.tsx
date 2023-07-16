@@ -34,6 +34,7 @@ export const App = () => {
 		userState: {
 			accessToken: cookies.accessToken || '',
 			refreshToken: cookies.refreshToken || '',
+			displayName: '',
 		},
 	} as AppState);
 
@@ -41,16 +42,7 @@ export const App = () => {
 		if (appState.userState.refreshToken) {
 			(async () => {
 				try {
-					const response = await axios.post(
-						`/api/refresh`,
-						{},
-						{
-							headers: {
-								authorization: `Bearer ${cookies.refreshToken}`,
-								language: appState.language,
-							},
-						}
-					);
+					const response = await axios.post(`/api/refresh`, {});
 					const refreshTokenExpiryDate = new Date();
 					refreshTokenExpiryDate.setDate(refreshTokenExpiryDate.getDate() + 7);
 
@@ -65,7 +57,22 @@ export const App = () => {
 						path: '/',
 						expires: accessTokenExpiryDate,
 					});
-				} catch (error) {
+
+					const userData = await axios.get(`/api/user`);
+					console.table(userData.data);
+					setAppState((prevState) => {
+						return {
+							...prevState,
+							userState: {
+								...prevState.userState,
+								displayName: userData.data.displayName,
+								userId: userData.data.userId,
+								email: userData.data.email,
+								id: userData.data._id,
+							},
+						};
+					});
+				} catch (error: any) {
 					console.warn('Refreshing failed with error: ', error.response.data);
 				}
 			})();

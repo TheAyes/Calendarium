@@ -25,30 +25,37 @@ const StyledAuthenticationForm = styled('form')`
 		&[type='text'],
 		&[type='password'],
 		&[type='email'] {
-			border-bottom: 2px solid ${(props) => (props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default.borderColor};
+			border: 2px solid transparent;
+			border-bottom: 2px solid
+				${(props) => (props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default.borderColor};
 
 			&:hover {
-				border-bottom: 2px solid ${(props) =>
-					(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered?.borderColor};
+				border-bottom: 2px solid
+					${(props) =>
+						(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered?.borderColor};
 			}
 
 			&:focus {
-				border-bottom: 2px solid ${(props) =>
-					(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused?.borderColor};
+				border-bottom: 2px solid
+					${(props) =>
+						(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused?.borderColor};
 			}
 		}
 
 		&[type='submit'] {
-			border: 2px solid ${(props) => (props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default.borderColor};
+			border: 2px solid
+				${(props) => (props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default.borderColor};
 
 			&:hover {
-				border: 2px solid ${(props) =>
-					(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered?.borderColor};
+				border: 2px solid
+					${(props) =>
+						(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered?.borderColor};
 			}
 
 			&:focus {
-				border: 2px solid ${(props) =>
-					(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused?.borderColor};
+				border: 2px solid
+					${(props) =>
+						(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused?.borderColor};
 			}
 		}
 
@@ -114,12 +121,12 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 				'/api/login',
 				{
 					userId: userId,
-					password: password
+					password: password,
 				},
 				{
 					headers: {
-						language: appState.get.language
-					}
+						language: appState.get.language,
+					},
 				}
 			);
 
@@ -131,11 +138,11 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 
 			setCookie('refreshToken', response.data.refreshToken, {
 				path: '/',
-				expires: refreshTokenExpiryDate
+				expires: refreshTokenExpiryDate,
 			});
 			setCookie('accessToken', response.data.accessToken, {
 				path: '/',
-				expires: accessTokenExpiryDate
+				expires: accessTokenExpiryDate,
 			});
 
 			appState.set((prevState) => {
@@ -143,15 +150,15 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 					...prevState,
 					userState: {
 						accessToken: response.data.accessToken,
-						refreshToken: response.data.refreshToken
-					}
+						refreshToken: response.data.refreshToken,
+					},
 				};
 			});
 
 			console.table({
 				status: response.status,
 				accessToken: response.data.accessToken,
-				refreshToken: response.data.refreshToken
+				refreshToken: response.data.refreshToken,
 			});
 		} catch (error: any) {
 			console.error(error);
@@ -181,12 +188,12 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 				displayName: displayName,
 				userId: userId,
 				email: email,
-				password: password
+				password: password,
 			},
 			{
 				headers: {
-					language: appState.get.language
-				}
+					language: appState.get.language,
+				},
 			}
 		);
 
@@ -198,11 +205,11 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 
 		setCookie('refreshToken', response.data.refreshToken, {
 			path: '/',
-			expires: refreshTokenExpiryDate
+			expires: refreshTokenExpiryDate,
 		});
 		setCookie('accessToken', response.data.accessToken, {
 			path: '/',
-			expires: accessTokenExpiryDate
+			expires: accessTokenExpiryDate,
 		});
 
 		appState.set((prevState) => {
@@ -210,15 +217,15 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 				...prevState,
 				userState: {
 					accessToken: response.data.accessToken,
-					refreshToken: response.data.refreshToken
-				}
+					refreshToken: response.data.refreshToken,
+				},
 			};
 		});
 
 		console.table({
 			status: response.status,
 			accessToken: response.data.accessToken,
-			refreshToken: response.data.refreshToken
+			refreshToken: response.data.refreshToken,
 		});
 	};
 
@@ -227,9 +234,9 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 			index !== activeTab
 				? tab
 				: {
-					...tab,
-					content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: true } : item))
-				}
+						...tab,
+						content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: true } : item)),
+				  }
 		);
 		setTabs(newTabs);
 	};
@@ -239,9 +246,9 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 			index !== activeTab
 				? tab
 				: {
-					...tab,
-					content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: false } : item))
-				}
+						...tab,
+						content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: false } : item)),
+				  }
 		);
 		setTabs(newTabs);
 	};
@@ -294,9 +301,9 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 				index !== activeTab
 					? tab
 					: {
-						...tab,
-						content: tab.content.map((item) => (item.key === key ? { ...item, value } : item))
-					}
+							...tab,
+							content: tab.content.map((item) => (item.key === key ? { ...item, value } : item)),
+					  }
 			);
 
 			newTabs[activeTab].content.forEach((item) => {
@@ -312,7 +319,7 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 
 	return (
 		<StyledAuthenticationForm onSubmit={[handleLogin, handleRegister][activeTab]} {...props}>
-			<AnimatePresence mode='popLayout'>
+			<AnimatePresence mode="popLayout">
 				{tabs[activeTab].content.map((currentItem, index) => {
 					return (
 						<motion.input
@@ -321,31 +328,31 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 							layout
 							initial={{
 								opacity: 0,
-								x: 100
+								x: 100,
 							}}
 							animate={{
 								opacity: 1,
 								x: 0,
 								transition: {
-									delay: index * 0.1 + 0.2
-								}
+									delay: index * 0.1 + 0.2,
+								},
 							}}
 							exit={{
 								opacity: 0,
-								x: -100
+								x: -100,
 							}}
 							transition={{
 								type: 'spring',
 								duration: 0.5,
 								stiffness: 120,
-								damping: 14
+								damping: 14,
 							}}
 							style={{
 								border: validState[currentItem.key] === false ? '2px solid red' : undefined,
 								animation:
 									validState[currentItem.key] === false
 										? 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both'
-										: undefined
+										: undefined,
 							}}
 							type={currentItem.type}
 							placeholder={currentItem.placeholder}

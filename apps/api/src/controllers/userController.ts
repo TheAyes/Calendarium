@@ -201,23 +201,27 @@ export const refreshUser = async (req: Request, res: Response) => {
 	}
 };
 
-export const authenticateUser = async (req: Request, res: Response, next: NextFunction) => {
+export const authenticateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
 	try {
 		const accessToken = req.cookies.accessToken;
 		if (!accessToken) {
 			res.status(401).json({ error: 'Unauthorized' });
+			return;
 		}
 
 		const result = authenticate({ accessToken: accessToken }, process.env.API_JWT_SECRET || '');
 		if (result.status !== 200) {
-			res.status(result.status!).json({ error: 'Unauthorized' });
+			res.status(result.status!).json({ error: 'Unauthorized' }); // Add return here
+			return;
 		}
 
 		req.user = await User.findById(result.payload?.userId).select('-password');
 		console.log(req.user);
 		next();
+		return;
 	} catch (error) {
 		res.status(500).json({ error: error });
+		return;
 	}
 };
 
