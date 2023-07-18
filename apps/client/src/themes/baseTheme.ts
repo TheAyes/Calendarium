@@ -1,48 +1,47 @@
 import { CalendariumTheme } from '../types/CalendariumTheme.ts';
 
 export const defaultTheme: CalendariumTheme = {
-	layers: [
-		{
-			button: {
+	colors: {
+		button: {
+			default: { fillColor: '#ffffff', borderColor: '#cccccc', textColor: '#000000' },
+			hovered: { fillColor: '#f0f0f0', borderColor: '#c0c0c0', textColor: '#000000' },
+			pressed: { fillColor: '#e0e0e0', borderColor: '#a0a0a0', textColor: '#000000' },
+			disabled: { fillColor: '#f5f5f5', borderColor: '#f5f5f5', textColor: '#888888' },
+			focused: { fillColor: '#ffffff', borderColor: '#0000ff', textColor: '#000000' },
+		},
+		header: '#eeeeee',
+		footer: '#eeeeee',
+		navigationMenu: '#dddddd',
+		text: {
+			headingColor: '#111111',
+			paragraphColor: '#333333',
+			linkColor: '#0000ff',
+		},
+		background: '#ffffff',
+		formElements: {
+			inputField: {
 				default: { fillColor: '#ffffff', borderColor: '#cccccc', textColor: '#000000' },
-				hovered: { fillColor: '#f0f0f0', borderColor: '#c0c0c0', textColor: '#000000' },
-				pressed: { fillColor: '#e0e0e0', borderColor: '#a0a0a0', textColor: '#000000' },
-				disabled: { fillColor: '#f5f5f5', borderColor: '#f5f5f5', textColor: '#888888' },
 				focused: { fillColor: '#ffffff', borderColor: '#0000ff', textColor: '#000000' },
 			},
-			header: '#eeeeee',
-			footer: '#eeeeee',
-			navigationMenu: '#dddddd',
-			text: {
-				headingColor: '#111111',
-				paragraphColor: '#333333',
-				linkColor: '#0000ff',
+			checkbox: {
+				default: { fillColor: '#ffffff', borderColor: '#cccccc', textColor: '#000000' },
+				disabled: { fillColor: '#f5f5f5', borderColor: '#f5f5f5', textColor: '#888888' },
 			},
-			background: '#ffffff',
-			formElements: {
-				inputField: {
-					default: { fillColor: '#ffffff', borderColor: '#cccccc', textColor: '#000000' },
-					focused: { fillColor: '#ffffff', borderColor: '#0000ff', textColor: '#000000' },
-				},
-				checkbox: {
-					default: { fillColor: '#ffffff', borderColor: '#cccccc', textColor: '#000000' },
-					disabled: { fillColor: '#f5f5f5', borderColor: '#f5f5f5', textColor: '#888888' },
-				},
-				radioButton: {
-					default: { fillColor: '#ffffff', borderColor: '#cccccc', textColor: '#000000' },
-					disabled: { fillColor: '#f5f5f5', borderColor: '#f5f5f5', textColor: '#888888' },
-				},
-				dropDownMenu: {
-					default: { fillColor: '#ffffff', borderColor: '#cccccc', textColor: '#000000' },
-					disabled: { fillColor: '#f5f5f5', borderColor: '#f5f5f5', textColor: '#888888' },
-				},
+			radioButton: {
+				default: { fillColor: '#ffffff', borderColor: '#cccccc', textColor: '#000000' },
+				disabled: { fillColor: '#f5f5f5', borderColor: '#f5f5f5', textColor: '#888888' },
 			},
-			cardColor: '#ffffff',
-			iconColor: '#000000',
-			borderColor: '#cccccc',
-			scrollbarColor: '#aaaaaa',
+			dropDownMenu: {
+				default: { fillColor: '#ffffff', borderColor: '#cccccc', textColor: '#000000' },
+				disabled: { fillColor: '#f5f5f5', borderColor: '#f5f5f5', textColor: '#888888' },
+			},
 		},
-	],
+		cardColor: '#ffffff',
+		iconColor: '#000000',
+		borderColor: '#cccccc',
+		scrollbarColor: '#aaaaaa',
+	},
+
 	typography: {
 		h1: {
 			fontFamily: 'Arial',

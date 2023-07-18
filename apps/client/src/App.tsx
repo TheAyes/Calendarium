@@ -8,6 +8,7 @@ import axios from 'axios';
 import { useCookies } from 'react-cookie';
 import { AppState } from './types/AppState.ts';
 import { CalendariumTheme } from './types/CalendariumTheme.ts';
+import { AuthenticationPageV2 } from './pages/AuthenticationPageV2.tsx';
 
 type AppContextType = {
 	get: {
@@ -90,6 +91,7 @@ export const App = () => {
 					<Routes>
 						<Route index path="/" element={<></>} />
 						<Route path="/authenticate" element={<AuthenticationPage />} />
+						<Route path="/authenticatev2" element={<AuthenticationPageV2 />} />
 						<Route path="/dashboard" element={<></>} />
 						<Route path="/*" element={<AuthenticationPage />} />
 					</Routes>

@@ -30,7 +30,7 @@ export type ElementStates = {
 	dropDownMenu?: StateProperties;
 };
 
-export type LayerColors = {
+export type Colors = {
 	button?: StateProperties;
 	header?: string;
 	footer?: string;
@@ -49,7 +49,7 @@ export type LayerColors = {
 };
 
 export type CalendariumTheme = {
-	layers: LayerColors[];
+	colors: Colors;
 	typography?: {
 		h1?: TextStyleProperty;
 		h2?: TextStyleProperty;

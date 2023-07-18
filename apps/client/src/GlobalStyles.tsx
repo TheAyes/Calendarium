@@ -14,11 +14,11 @@ export const GlobalStyles = () => {
 
 				html {
 					scroll-behavior: smooth;
-					background: ${currentTheme.layers[0].background};
+					background: ${currentTheme.colors.background};
 
 					body {
 						overflow-x: hidden;
-						color: ${currentTheme.layers[0].text?.paragraphColor};
+						color: ${currentTheme.colors.text?.paragraphColor};
 
 						// Typography //
 						font-family: ${currentTheme.typography?.p?.fontFamily};
@@ -26,21 +26,21 @@ export const GlobalStyles = () => {
 
 						h1 {
 							font-size: ${currentTheme.typography?.h1?.fontSize};
-							color: ${currentTheme.layers[0].text?.headingColor};
+							color: ${currentTheme.colors.text?.headingColor};
 						}
 
 						h2 {
 							font-size: ${currentTheme.typography?.h2?.fontSize};
-							color: ${currentTheme.layers[0].text?.headingColor};
+							color: ${currentTheme.colors.text?.headingColor};
 						}
 
 						p {
 							font-size: ${currentTheme.typography?.p?.fontSize};
-							color: ${currentTheme.layers[0].text?.paragraphColor};
+							color: ${currentTheme.colors.text?.paragraphColor};
 						}
 
 						a {
-							color: ${currentTheme.layers[0].text?.linkColor};
+							color: ${currentTheme.colors.text?.linkColor};
 							text-decoration: ${currentTheme.typography?.a?.textDecoration};
 						}
 
@@ -52,19 +52,19 @@ export const GlobalStyles = () => {
 							outline: none;
 
 							background-color: rgba(255, 255, 255, 0.01);
-							color: ${currentTheme.layers[0].formElements?.inputField?.default.textColor};
+							color: ${currentTheme.colors.formElements?.inputField?.default.textColor};
 							border: none;
 
 							transition: background-color 500ms, color 500ms, border 500ms;
 
 							&:hover {
-								background: ${currentTheme.layers[0].formElements?.inputField?.hovered?.fillColor};
-								color: ${currentTheme.layers[0].formElements?.inputField?.hovered?.textColor};
+								background: ${currentTheme.colors.formElements?.inputField?.hovered?.fillColor};
+								color: ${currentTheme.colors.formElements?.inputField?.hovered?.textColor};
 							}
 
 							&:focus {
-								background: ${currentTheme.layers[0].formElements?.inputField?.focused?.fillColor};
-								color: ${currentTheme.layers[0].formElements?.inputField?.focused?.textColor};
+								background: ${currentTheme.colors.formElements?.inputField?.focused?.fillColor};
+								color: ${currentTheme.colors.formElements?.inputField?.focused?.textColor};
 							}
 						}
 					}
