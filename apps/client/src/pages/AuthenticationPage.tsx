@@ -1,6 +1,6 @@
 import { FC, useContext, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
-import { motion } from 'framer-motion';
+import { LayoutGroup, motion } from 'framer-motion';
 import { CalendariumTheme } from '../types/CalendariumTheme.ts';
 import { Tab, TabContent } from '../types/AuthenticationTypes.ts';
 import { AuthenticationHelper } from '../components/authentication/AuthenticationHelper.tsx';
@@ -96,7 +96,7 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 					isFocused: false,
 					description: translations[appState.get.language].login.content.userId.description,
 					value: '',
-					rules: []
+					rules: [],
 				},
 				{
 					type: 'password',
@@ -104,7 +104,7 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 					key: 'passwordInput',
 					isFocused: false,
 					description: translations[appState.get.language].login.content.password.description,
-					value: ''
+					value: '',
 				},
 				{
 					type: 'submit',
@@ -112,9 +112,9 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 					key: 'submitInput',
 					isFocused: false,
 					description: translations[appState.get.language].login.content.submit.description,
-					value: ''
-				}
-			]
+					value: '',
+				},
+			],
 		},
 		{
 			label: translations[appState.get.language].register.label,
@@ -129,10 +129,10 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 					rules: [
 						{
 							description:
-							translations[appState.get.language].register.content.displayName.rules?.[0].description,
-							checkFunction: (input) => /^[a-zA-z].*$/.test(input)
-						}
-					]
+								translations[appState.get.language].register.content.displayName.rules?.[0].description,
+							checkFunction: (input) => /^[a-zA-z].*$/.test(input),
+						},
+					],
 				},
 				{
 					type: 'text',
@@ -144,20 +144,20 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 					rules: [
 						{
 							description:
-							translations[appState.get.language].register.content.userId.rules?.[0].description,
-							checkFunction: (input) => mustBeginWithLowerCase(input)
+								translations[appState.get.language].register.content.userId.rules?.[0].description,
+							checkFunction: (input) => mustBeginWithLowerCase(input),
 						},
 						{
 							description:
-							translations[appState.get.language].register.content.userId.rules?.[1].description,
-							checkFunction: (input) => canContainLettersNumbersUnderscoresHyphens(input)
+								translations[appState.get.language].register.content.userId.rules?.[1].description,
+							checkFunction: (input) => canContainLettersNumbersUnderscoresHyphens(input),
 						},
 						{
 							description:
-							translations[appState.get.language].register.content.userId.rules?.[2].description,
-							checkFunction: (input) => isValidLength(input)
-						}
-					]
+								translations[appState.get.language].register.content.userId.rules?.[2].description,
+							checkFunction: (input) => isValidLength(input),
+						},
+					],
 				},
 				{
 					type: 'email',
@@ -169,10 +169,10 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 					rules: [
 						{
 							description:
-							translations[appState.get.language].register.content.email.rules?.[0].description,
-							checkFunction: (input) => isValidEmail(input)
-						}
-					]
+								translations[appState.get.language].register.content.email.rules?.[0].description,
+							checkFunction: (input) => isValidEmail(input),
+						},
+					],
 				},
 				{
 					type: 'password',
@@ -184,31 +184,31 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 					rules: [
 						{
 							description:
-							translations[appState.get.language].register.content.password.rules?.[0].description,
-							checkFunction: (input) => containsLowerCase(input)
+								translations[appState.get.language].register.content.password.rules?.[0].description,
+							checkFunction: (input) => containsLowerCase(input),
 						},
 						{
 							description:
-							translations[appState.get.language].register.content.password.rules?.[1].description,
-							checkFunction: (input) => containsUpperCase(input)
+								translations[appState.get.language].register.content.password.rules?.[1].description,
+							checkFunction: (input) => containsUpperCase(input),
 						},
 						{
 							description:
-							translations[appState.get.language].register.content.password.rules?.[2].description,
-							checkFunction: (input) => containsDigit(input)
+								translations[appState.get.language].register.content.password.rules?.[2].description,
+							checkFunction: (input) => containsDigit(input),
 						},
 						{
 							description:
-							translations[appState.get.language].register.content.password.rules?.[3].description,
+								translations[appState.get.language].register.content.password.rules?.[3].description,
 							checkFunction: (input) => containsSpecialCharacter(input),
-							additionalData: specialPasswordCharacters
+							additionalData: specialPasswordCharacters,
 						},
 						{
 							description:
-							translations[appState.get.language].register.content.password.rules?.[4].description,
-							checkFunction: (input) => isMinimumLength(input)
-						}
-					]
+								translations[appState.get.language].register.content.password.rules?.[4].description,
+							checkFunction: (input) => isMinimumLength(input),
+						},
+					],
 				},
 				{
 					type: 'password',
@@ -220,18 +220,18 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 					rules: [
 						{
 							description:
-							translations[appState.get.language].register.content.confirmPassword.rules?.[0]
-								.description,
-							checkFunction: (input) => !!input
+								translations[appState.get.language].register.content.confirmPassword.rules?.[0]
+									.description,
+							checkFunction: (input) => !!input,
 						},
 						{
 							description:
-							translations[appState.get.language].register.content.confirmPassword.rules?.[1]
-								.description,
+								translations[appState.get.language].register.content.confirmPassword.rules?.[1]
+									.description,
 							checkFunction: (input, formValues): boolean =>
-								matchWithPreviousPassword(input, formValues!)
-						}
-					]
+								matchWithPreviousPassword(input, formValues!),
+						},
+					],
 				},
 				{
 					type: 'submit',
@@ -239,10 +239,10 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 					key: 'submitInput',
 					isFocused: false,
 					description: translations[appState.get.language].register.content.submit.description,
-					value: ''
-				}
-			]
-		}
+					value: '',
+				},
+			],
+		},
 	] as Tab[]);
 
 	const handleBlurAll = () => {
@@ -250,9 +250,9 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 			index !== activeTab
 				? tab
 				: {
-					...tab,
-					content: tab.content.map((item) => ({ ...item, isFocused: false }))
-				}
+						...tab,
+						content: tab.content.map((item) => ({ ...item, isFocused: false })),
+				  }
 		);
 		setTabs(newTabs);
 	};
@@ -264,48 +264,50 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 
 	return (
 		<StyledAuthenticatePage {...props}>
-			<main>
-				<ul>
-					{tabs.map((item, index) => (
-						<motion.li
-							className={activeTab === index ? 'active' : ''}
-							layoutId={item.label}
-							initial={{
-								y: -100
-							}}
-							animate={{
-								y: 0,
-								transition: {
-									delay: index * 0.1,
-									type: 'spring',
-									duration: 1,
-									stiffness: 120,
-									damping: 14
-								}
-							}}
-							exit={{
-								y: -100
-							}}
-							key={item.label}
-							onClick={() => {
-								handleBlurAll();
-								setActiveTab(index);
-							}}
-						>
-							<p>{item.label}</p>
+			<LayoutGroup>
+				<main>
+					<ul>
+						{tabs.map((item, index) => (
+							<motion.li
+								className={activeTab === index ? 'active' : ''}
+								layoutId={item.label}
+								initial={{
+									y: -100,
+								}}
+								animate={{
+									y: 0,
+									transition: {
+										delay: index * 0.1,
+										type: 'spring',
+										duration: 1,
+										stiffness: 120,
+										damping: 14,
+									},
+								}}
+								exit={{
+									y: -100,
+								}}
+								key={item.label}
+								onClick={() => {
+									handleBlurAll();
+									setActiveTab(index);
+								}}
+							>
+								<p>{item.label}</p>
 
-							{activeTab === index && <motion.div layoutId='underline' />}
-						</motion.li>
-					))}
-				</ul>
-				<AuthenticationForm tabs={tabs} activeTab={activeTab} setTabs={setTabs} />
-			</main>
+								{activeTab === index && <motion.div layoutId="underline" />}
+							</motion.li>
+						))}
+					</ul>
+					<AuthenticationForm tabs={tabs} activeTab={activeTab} setTabs={setTabs} />
+				</main>
 
-			<AuthenticationHelper
-				tabs={tabs}
-				activeTab={activeTab}
-				currentFocusedInputField={currentFocusedInputField}
-			/>
+				<AuthenticationHelper
+					tabs={tabs}
+					activeTab={activeTab}
+					currentFocusedInputField={currentFocusedInputField}
+				/>
+			</LayoutGroup>
 		</StyledAuthenticatePage>
 	);
 };
