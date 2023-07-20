@@ -4,7 +4,7 @@ export type AppState = {
 	theme: CalendariumTheme;
 	language: string;
 	userState: {
-		accessToken: any;
-		refreshToken: any;
+		displayName: string;
+		email: string;
 	};
 };

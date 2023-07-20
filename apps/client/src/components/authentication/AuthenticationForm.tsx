@@ -3,9 +3,8 @@ import styled from '@emotion/styled';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Tab } from '../../types/AuthenticationTypes.ts';
 import { CalendariumTheme } from '../../types/CalendariumTheme.ts';
-import { useCookies } from 'react-cookie';
-import { AppContext } from '../../App.tsx';
-import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
+import { AuthContext } from '../contextProviders/AuthenticationProvider.tsx';
 
 const StyledAuthenticationForm = styled('form')`
 	grid-column: 1/2;
@@ -13,12 +12,12 @@ const StyledAuthenticationForm = styled('form')`
 	display: flex;
 	flex-direction: column;
 
-	gap: ${(props) => (props.theme as CalendariumTheme).spacing(0.75)};
+	gap: 1em;
 
 	& > input {
 		flex: 1;
 		padding: 16px;
-		color: ${(props) => (props.theme as CalendariumTheme).layers[0].text?.paragraphColor};
+		color: ${(props) => (props.theme as CalendariumTheme).colors?.text?.paragraphColor};
 		font-weight: ${(props) => (props.theme as CalendariumTheme).typography?.h2?.fontWeight};
 		position: relative;
 
@@ -27,35 +26,35 @@ const StyledAuthenticationForm = styled('form')`
 		&[type='email'] {
 			border: 2px solid transparent;
 			border-bottom: 2px solid
-				${(props) => (props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default.borderColor};
+				${(props) => (props.theme as CalendariumTheme).colors?.formElements?.inputField?.default.borderColor};
 
 			&:hover {
 				border-bottom: 2px solid
 					${(props) =>
-						(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered?.borderColor};
+						(props.theme as CalendariumTheme).colors?.formElements?.inputField?.hovered?.borderColor};
 			}
 
 			&:focus {
 				border-bottom: 2px solid
 					${(props) =>
-						(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused?.borderColor};
+						(props.theme as CalendariumTheme).colors?.formElements?.inputField?.focused?.borderColor};
 			}
 		}
 
 		&[type='submit'] {
 			border: 2px solid
-				${(props) => (props.theme as CalendariumTheme).layers[0].formElements?.inputField?.default.borderColor};
+				${(props) => (props.theme as CalendariumTheme).colors?.formElements?.inputField?.default.borderColor};
 
 			&:hover {
 				border: 2px solid
 					${(props) =>
-						(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.hovered?.borderColor};
+						(props.theme as CalendariumTheme).colors?.formElements?.inputField?.hovered?.borderColor};
 			}
 
 			&:focus {
 				border: 2px solid
 					${(props) =>
-						(props.theme as CalendariumTheme).layers[0].formElements?.inputField?.focused?.borderColor};
+						(props.theme as CalendariumTheme).colors?.formElements?.inputField?.focused?.borderColor};
 			}
 		}
 
@@ -103,9 +102,9 @@ type AuthenticationFormProps = {
 export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, activeTab, setTabs, ...props }) => {
 	const [validState, setValidState] = useState<Record<string, boolean>>({});
 	const [authError, setAuthError] = useState('');
-	const [_, setCookie] = useCookies(['accessToken', 'refreshToken']);
 
-	const appState = useContext(AppContext);
+	const authFunctions = useContext(AuthContext);
+	const navigate = useNavigate();
 
 	const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -116,54 +115,11 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 		if (invalidFields.length > 0) {
 			return;
 		}
-		try {
-			const response = await axios.post(
-				'/api/login',
-				{
-					userId: userId,
-					password: password,
-				},
-				{
-					headers: {
-						language: appState.get.language,
-					},
-				}
-			);
 
-			const refreshTokenExpiryDate = new Date();
-			refreshTokenExpiryDate.setDate(refreshTokenExpiryDate.getDate() + 7);
+		const success: boolean = await authFunctions.loginUser(userId, password);
 
-			const accessTokenExpiryDate = new Date();
-			accessTokenExpiryDate.setDate(accessTokenExpiryDate.getMinutes() + 10);
-
-			setCookie('refreshToken', response.data.refreshToken, {
-				path: '/',
-				expires: refreshTokenExpiryDate,
-			});
-			setCookie('accessToken', response.data.accessToken, {
-				path: '/',
-				expires: accessTokenExpiryDate,
-			});
-
-			appState.set((prevState) => {
-				return {
-					...prevState,
-					userState: {
-						accessToken: response.data.accessToken,
-						refreshToken: response.data.refreshToken,
-					},
-				};
-			});
-
-			console.table({
-				status: response.status,
-				accessToken: response.data.accessToken,
-				refreshToken: response.data.refreshToken,
-			});
-		} catch (error: any) {
-			console.error(error);
-			setAuthError(error.response.data.error);
-		}
+		if (success) navigate('/dashboard');
+		else setAuthError('Invalid login credentials.');
 	};
 
 	const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
@@ -173,60 +129,15 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 		const userId = ((event.target as HTMLFormElement).elements[1] as HTMLInputElement).value;
 		const email = ((event.target as HTMLFormElement).elements[2] as HTMLInputElement).value;
 		const password = ((event.target as HTMLFormElement).elements[3] as HTMLInputElement).value;
-		//const confirmPassword = ((event.target as HTMLFormElement).elements[4] as HTMLInputElement).value;
 
 		const invalidFields = validateUserInput();
 		if (invalidFields.length > 0) {
-			// Handle invalid inputs here
-			console.log('Invalid inputs: ', invalidFields);
 			return;
 		}
 
-		const response = await axios.post(
-			'/api/register',
-			{
-				displayName: displayName,
-				userId: userId,
-				email: email,
-				password: password,
-			},
-			{
-				headers: {
-					language: appState.get.language,
-				},
-			}
-		);
-
-		const refreshTokenExpiryDate = new Date();
-		refreshTokenExpiryDate.setDate(refreshTokenExpiryDate.getDate() + 7);
-
-		const accessTokenExpiryDate = new Date();
-		accessTokenExpiryDate.setDate(accessTokenExpiryDate.getMinutes() + 10);
-
-		setCookie('refreshToken', response.data.refreshToken, {
-			path: '/',
-			expires: refreshTokenExpiryDate,
-		});
-		setCookie('accessToken', response.data.accessToken, {
-			path: '/',
-			expires: accessTokenExpiryDate,
-		});
-
-		appState.set((prevState) => {
-			return {
-				...prevState,
-				userState: {
-					accessToken: response.data.accessToken,
-					refreshToken: response.data.refreshToken,
-				},
-			};
-		});
-
-		console.table({
-			status: response.status,
-			accessToken: response.data.accessToken,
-			refreshToken: response.data.refreshToken,
-		});
+		const success: boolean = await authFunctions.registerUser(displayName, userId, email, password);
+		if (success) navigate('/dashboard');
+		else setAuthError('Invalid Registration');
 	};
 
 	const handleFocus = (key: string) => {
@@ -337,17 +248,15 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 							animate={{
 								opacity: 1,
 								x: 0,
-								transition: {
-									delay: index * 0.1 + 0.2,
-								},
 							}}
 							exit={{
 								opacity: 0,
 								x: -100,
 							}}
 							transition={{
+								delay: index * 0.05,
 								type: 'spring',
-								duration: 0.5,
+								duration: 1,
 								stiffness: 120,
 								damping: 14,
 							}}

@@ -5,8 +5,7 @@ import { RuleList } from './RuleList.tsx';
 import { Tab, TabContent } from '../../types/AuthenticationTypes.ts';
 
 const StyledAuthenticationHelper = styled('aside')`
-	padding: 1rem;
-
+	padding: 5em 1em;
 	width: 340px;
 `;
 

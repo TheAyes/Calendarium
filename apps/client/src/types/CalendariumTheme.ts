@@ -49,7 +49,7 @@ export type LayerColors = {
 };
 
 export type CalendariumTheme = {
-	layers: LayerColors[];
+	colors: LayerColors;
 	typography?: {
 		h1?: TextStyleProperty;
 		h2?: TextStyleProperty;

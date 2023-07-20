@@ -36,7 +36,7 @@ export const translations: Translation = {
 					description: 'Enter your user-id:',
 					rules: [
 						{ description: 'Must begin with a lowercase letter.' },
-						{ description: 'Can contain lowercase letters, numbers, underscores and hyphens.' },
+						{ description: 'Must contain only lowercase letters, numbers, underscores and/or hyphens.' },
 						{ description: 'Must be at least 3 character and not exceed 30 characters in length.' },
 					],
 				},

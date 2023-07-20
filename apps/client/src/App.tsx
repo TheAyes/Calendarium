@@ -1,62 +1,22 @@
 import { GlobalStyles } from './GlobalStyles.tsx';
 import { ThemeProvider } from '@emotion/react';
-import { createContext, Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { Route, Routes, useLocation, useNavigate } from 'react-router-dom';
-import { darkTheme } from './themes/darkTheme.ts';
+import { Route, Routes } from 'react-router-dom';
 import { AuthenticationPage } from './pages/AuthenticationPage.tsx';
-import axios from 'axios';
+import { DashboardPage } from './pages/DashboardPage.tsx';
+import { AuthenticationProvider } from './components/contextProviders/AuthenticationProvider.tsx';
+import { useEffect } from 'react';
 import { useCookies } from 'react-cookie';
-import { AppState } from './types/AppState.ts';
-import { CalendariumTheme } from './types/CalendariumTheme.ts';
-
-type AppContextType = {
-	get: {
-		theme: CalendariumTheme;
-		language: string;
-		userState: {
-			accessToken: string;
-			refreshToken: string;
-		};
-	};
-	set: Dispatch<SetStateAction<AppState>>;
-};
-export const AppContext = createContext({} as AppContextType);
+import { darkTheme } from './themes/darkTheme.ts';
 
 export const App = () => {
-	const location = useLocation();
-	const navigate = useNavigate();
-
-	const [cookies, setCookie] = useCookies(['accessToken', 'refreshToken']);
-
-	const [appState, setAppState] = useState({
-		theme: darkTheme,
-		language: 'en',
-		userState: {
-			accessToken: cookies.accessToken || '',
-			refreshToken: cookies.refreshToken || '',
-			displayName: '',
-		},
-	} as AppState);
-
+	const [cookies, setCookie] = useCookies(['language']);
+	/*
 	useEffect(() => {
-		if (appState.userState.refreshToken) {
+		if (cookies.refreshToken) {
 			(async () => {
 				try {
 					const response = await axios.post(`/api/refresh`, {});
-					const refreshTokenExpiryDate = new Date();
-					refreshTokenExpiryDate.setDate(refreshTokenExpiryDate.getDate() + 7);
-
-					const accessTokenExpiryDate = new Date();
-					accessTokenExpiryDate.setDate(accessTokenExpiryDate.getMinutes() + 10);
-
-					setCookie('refreshToken', response.data.refreshToken, {
-						path: '/',
-						expires: refreshTokenExpiryDate,
-					});
-					setCookie('accessToken', response.data.accessToken, {
-						path: '/',
-						expires: accessTokenExpiryDate,
-					});
+					generateUserTokens(response, setCookie, setAppState);
 
 					const userData = await axios.get(`/api/user`);
 					console.table(userData.data);
@@ -76,25 +36,30 @@ export const App = () => {
 					console.warn('Refreshing failed with error: ', error.response.data);
 				}
 			})();
-		}
-		if (!appState.userState.accessToken && !appState.userState.refreshToken) {
+		} else if (!cookies.accessToken && !cookies.refreshToken) {
 			navigate('/authenticate');
 			return;
 		}
 	}, [location.pathname]);
+	 */
+
+	useEffect(() => {
+		if (!cookies.language) setCookie('language', 'en');
+	}, []);
+
 	return (
 		<>
-			<AppContext.Provider value={{ get: appState, set: setAppState }}>
-				<ThemeProvider theme={appState.theme}>
+			<AuthenticationProvider>
+				<ThemeProvider theme={darkTheme}>
 					<GlobalStyles />
 					<Routes>
 						<Route index path="/" element={<></>} />
 						<Route path="/authenticate" element={<AuthenticationPage />} />
-						<Route path="/dashboard" element={<></>} />
+						<Route path="/dashboard" element={<DashboardPage />} />
 						<Route path="/*" element={<AuthenticationPage />} />
 					</Routes>
 				</ThemeProvider>
-			</AppContext.Provider>
+			</AuthenticationProvider>
 		</>
 	);
 };

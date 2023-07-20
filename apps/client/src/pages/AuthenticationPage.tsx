@@ -1,12 +1,12 @@
-import { FC, useContext, useMemo, useState } from 'react';
+import { FC, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
-import { LayoutGroup, motion } from 'framer-motion';
+import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { CalendariumTheme } from '../types/CalendariumTheme.ts';
 import { Tab, TabContent } from '../types/AuthenticationTypes.ts';
 import { AuthenticationHelper } from '../components/authentication/AuthenticationHelper.tsx';
 import { AuthenticationForm } from '../components/authentication/AuthenticationForm.tsx';
-import { AppContext } from '../App.tsx';
 import { translations } from '../localization/translations.ts';
+import { useCookies } from 'react-cookie';
 
 type AuthenticatePageProps = {
 	[key: string]: unknown;
@@ -15,7 +15,6 @@ type AuthenticatePageProps = {
 const StyledAuthenticatePage = styled('div')`
 	display: flex;
 	justify-content: center;
-	align-items: center;
 	padding-top: 5rem;
 
 	& main {
@@ -25,11 +24,9 @@ const StyledAuthenticatePage = styled('div')`
 		width: 25rem;
 
 		min-height: 550px;
-		justify-content: center;
 
 		& > ul {
 			display: flex;
-
 			grid-column: 1/2;
 
 			& > li {
@@ -37,15 +34,15 @@ const StyledAuthenticatePage = styled('div')`
 				cursor: pointer;
 				display: flex;
 				flex-direction: column;
-				background: ${(props) => (props.theme as CalendariumTheme).layers[0].button?.focused?.fillColor};
+				background: ${(props) => (props.theme as CalendariumTheme).colors?.button?.focused?.fillColor};
 				transition: background-color 200ms;
 
 				&.active {
-					background: ${(props) => (props.theme as CalendariumTheme).layers[0].button?.focused?.fillColor};
+					background: ${(props) => (props.theme as CalendariumTheme).colors?.button?.focused?.fillColor};
 				}
 
 				&:hover {
-					background: ${(props) => (props.theme as CalendariumTheme).layers[0].button?.hovered?.fillColor};
+					background: ${(props) => (props.theme as CalendariumTheme).colors?.button?.hovered?.fillColor};
 				}
 
 				& > P {
@@ -58,7 +55,7 @@ const StyledAuthenticatePage = styled('div')`
 
 				& > div {
 					height: 4px;
-					background: ${(props) => (props.theme as CalendariumTheme).layers[0].button?.default.fillColor};
+					background: ${(props) => (props.theme as CalendariumTheme).colors?.button?.default.fillColor};
 				}
 			}
 		}
@@ -82,151 +79,162 @@ const specialPasswordCharacters = '[ @, $, !, %, *, ?, &, -, _, +, ., , ]';
 
 export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 	const [activeTab, setActiveTab] = useState(0);
-
-	const appState = useContext(AppContext);
+	const [cookies, _] = useCookies(['language']);
 
 	const [tabs, setTabs] = useState([
 		{
-			label: translations[appState.get?.language].login.label,
+			label: translations[cookies.language || 'en' || 'en'].login.label,
 			content: [
 				{
 					type: 'text',
-					placeholder: translations[appState.get.language].login.content.userId.placeholder,
+					placeholder: translations[cookies.language || 'en'].login.content.userId.placeholder,
 					key: 'userIdInput',
 					isFocused: false,
-					description: translations[appState.get.language].login.content.userId.description,
+					description: translations[cookies.language || 'en'].login.content.userId.description,
 					value: '',
-					rules: [],
+					rules: [
+						{
+							description:
+								translations[cookies.language || 'en'].register.content.userId.rules?.[0].description,
+							checkFunction: (input) => mustBeginWithLowerCase(input),
+						},
+						{
+							description:
+								translations[cookies.language || 'en'].register.content.userId.rules?.[1].description,
+							checkFunction: (input) => canContainLettersNumbersUnderscoresHyphens(input),
+						},
+					],
 				},
 				{
 					type: 'password',
-					placeholder: translations[appState.get.language].login.content.password.placeholder,
+					placeholder: translations[cookies.language || 'en'].login.content.password.placeholder,
 					key: 'passwordInput',
 					isFocused: false,
-					description: translations[appState.get.language].login.content.password.description,
+					description: translations[cookies.language || 'en'].login.content.password.description,
 					value: '',
 				},
 				{
 					type: 'submit',
-					placeholder: translations[appState.get.language].login.content.submit.placeholder,
+					placeholder: translations[cookies.language || 'en'].login.content.submit.placeholder,
 					key: 'submitInput',
 					isFocused: false,
-					description: translations[appState.get.language].login.content.submit.description,
+					description: translations[cookies.language || 'en'].login.content.submit.description,
 					value: '',
 				},
 			],
 		},
 		{
-			label: translations[appState.get.language].register.label,
+			label: translations[cookies.language || 'en'].register.label,
 			content: [
 				{
 					type: 'text',
-					placeholder: translations[appState.get.language].register.content.displayName.placeholder,
+					placeholder: translations[cookies.language || 'en'].register.content.displayName.placeholder,
 					key: 'displayNameInput',
 					isFocused: false,
-					description: translations[appState.get.language].register.content.displayName.description,
+					description: translations[cookies.language || 'en'].register.content.displayName.description,
 					value: '',
 					rules: [
 						{
 							description:
-								translations[appState.get.language].register.content.displayName.rules?.[0].description,
+								translations[cookies.language || 'en'].register.content.displayName.rules?.[0]
+									.description,
 							checkFunction: (input) => /^[a-zA-z].*$/.test(input),
 						},
 					],
 				},
 				{
 					type: 'text',
-					placeholder: translations[appState.get.language].register.content.userId.placeholder,
+					placeholder: translations[cookies.language || 'en'].register.content.userId.placeholder,
 					key: 'userIdInput',
 					isFocused: false,
-					description: translations[appState.get.language].register.content.userId.description,
+					description: translations[cookies.language || 'en'].register.content.userId.description,
 					value: '',
 					rules: [
 						{
 							description:
-								translations[appState.get.language].register.content.userId.rules?.[0].description,
+								translations[cookies.language || 'en'].register.content.userId.rules?.[0].description,
 							checkFunction: (input) => mustBeginWithLowerCase(input),
 						},
 						{
 							description:
-								translations[appState.get.language].register.content.userId.rules?.[1].description,
+								translations[cookies.language || 'en'].register.content.userId.rules?.[1].description,
 							checkFunction: (input) => canContainLettersNumbersUnderscoresHyphens(input),
 						},
 						{
 							description:
-								translations[appState.get.language].register.content.userId.rules?.[2].description,
+								translations[cookies.language || 'en'].register.content.userId.rules?.[2].description,
 							checkFunction: (input) => isValidLength(input),
 						},
 					],
 				},
 				{
 					type: 'email',
-					placeholder: translations[appState.get.language].register.content.email.placeholder,
+					placeholder: translations[cookies.language || 'en'].register.content.email.placeholder,
 					key: 'emailInput',
 					isFocused: false,
-					description: translations[appState.get.language].register.content.email.description,
+					description: translations[cookies.language || 'en'].register.content.email.description,
 					value: '',
 					rules: [
 						{
 							description:
-								translations[appState.get.language].register.content.email.rules?.[0].description,
+								translations[cookies.language || 'en'].register.content.email.rules?.[0].description,
 							checkFunction: (input) => isValidEmail(input),
 						},
 					],
 				},
 				{
 					type: 'password',
-					placeholder: translations[appState.get.language].register.content.password.placeholder,
+					placeholder: translations[cookies.language || 'en'].register.content.password.placeholder,
 					key: 'passwordInput',
 					isFocused: false,
-					description: translations[appState.get.language].register.content.password.description,
+					description: translations[cookies.language || 'en'].register.content.password.description,
 					value: '',
 					rules: [
 						{
 							description:
-								translations[appState.get.language].register.content.password.rules?.[0].description,
+								translations[cookies.language || 'en'].register.content.password.rules?.[0].description,
 							checkFunction: (input) => containsLowerCase(input),
 						},
 						{
 							description:
-								translations[appState.get.language].register.content.password.rules?.[1].description,
+								translations[cookies.language || 'en'].register.content.password.rules?.[1].description,
 							checkFunction: (input) => containsUpperCase(input),
 						},
 						{
 							description:
-								translations[appState.get.language].register.content.password.rules?.[2].description,
+								translations[cookies.language || 'en'].register.content.password.rules?.[2].description,
 							checkFunction: (input) => containsDigit(input),
 						},
 						{
 							description:
-								translations[appState.get.language].register.content.password.rules?.[3].description,
+								translations[cookies.language || 'en'].register.content.password.rules?.[3].description,
 							checkFunction: (input) => containsSpecialCharacter(input),
 							additionalData: specialPasswordCharacters,
 						},
 						{
 							description:
-								translations[appState.get.language].register.content.password.rules?.[4].description,
+								translations[cookies.language || 'en'].register.content.password.rules?.[4].description,
 							checkFunction: (input) => isMinimumLength(input),
 						},
 					],
 				},
 				{
 					type: 'password',
-					placeholder: translations[appState.get.language].register.content.confirmPassword.placeholder,
+					placeholder: translations[cookies.language || 'en'].register.content.confirmPassword.placeholder,
 					key: 'confirmPasswordInput',
 					isFocused: false,
-					description: translations[appState.get.language].register.content.confirmPassword.description,
+					description: translations[cookies.language || 'en'].register.content.confirmPassword.description,
 					value: '',
 					rules: [
 						{
 							description:
-								translations[appState.get.language].register.content.confirmPassword.rules?.[0]
+								translations[cookies.language || 'en'].register.content.confirmPassword.rules?.[0]
 									.description,
 							checkFunction: (input) => !!input,
 						},
 						{
 							description:
-								translations[appState.get.language].register.content.confirmPassword.rules?.[1]
+								translations[cookies.language || 'en'].register.content.confirmPassword.rules?.[1]
 									.description,
 							checkFunction: (input, formValues): boolean =>
 								matchWithPreviousPassword(input, formValues!),
@@ -235,10 +243,10 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 				},
 				{
 					type: 'submit',
-					placeholder: translations[appState.get.language].register.content.submit.placeholder,
+					placeholder: translations[cookies.language || 'en'].register.content.submit.placeholder,
 					key: 'submitInput',
 					isFocused: false,
-					description: translations[appState.get.language].register.content.submit.description,
+					description: translations[cookies.language || 'en'].register.content.submit.description,
 					value: '',
 				},
 			],
@@ -267,37 +275,39 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 			<LayoutGroup>
 				<main>
 					<ul>
-						{tabs.map((item, index) => (
-							<motion.li
-								className={activeTab === index ? 'active' : ''}
-								layoutId={item.label}
-								initial={{
-									y: -100,
-								}}
-								animate={{
-									y: 0,
-									transition: {
+						<AnimatePresence>
+							{tabs.map((item, index) => (
+								<motion.li
+									className={activeTab === index ? 'active' : ''}
+									layoutId={item.label}
+									initial={{
+										y: -100,
+									}}
+									animate={{
+										y: 0,
+									}}
+									exit={{
+										y: -100,
+									}}
+									transition={{
 										delay: index * 0.1,
 										type: 'spring',
 										duration: 1,
 										stiffness: 120,
 										damping: 14,
-									},
-								}}
-								exit={{
-									y: -100,
-								}}
-								key={item.label}
-								onClick={() => {
-									handleBlurAll();
-									setActiveTab(index);
-								}}
-							>
-								<p>{item.label}</p>
+									}}
+									key={item.label}
+									onClick={() => {
+										handleBlurAll();
+										setActiveTab(index);
+									}}
+								>
+									<p>{item.label}</p>
 
-								{activeTab === index && <motion.div layoutId="underline" />}
-							</motion.li>
-						))}
+									{activeTab === index && <motion.div layoutId="underline" />}
+								</motion.li>
+							))}
+						</AnimatePresence>
 					</ul>
 					<AuthenticationForm tabs={tabs} activeTab={activeTab} setTabs={setTabs} />
 				</main>
