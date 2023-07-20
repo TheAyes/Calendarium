@@ -1,4 +1,4 @@
-import React, { Dispatch, FormEvent, SetStateAction, useCallback, useContext, useState } from 'react';
+import React, { Dispatch, FormEvent, SetStateAction, useCallback, useContext, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Tab } from '../../types/AuthenticationTypes.ts';
@@ -316,6 +316,10 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 		},
 		[activeTab, tabs]
 	);
+
+	useEffect(() => {
+		setAuthError('');
+	}, [activeTab]);
 
 	return (
 		<StyledAuthenticationForm onSubmit={[handleLogin, handleRegister][activeTab]} {...props}>
