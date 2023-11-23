@@ -147,7 +147,7 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 				: {
 						...tab,
 						content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: true } : item)),
-				  }
+				  },
 		);
 		setTabs(newTabs);
 	};
@@ -159,14 +159,14 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 				: {
 						...tab,
 						content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: false } : item)),
-				  }
+				  },
 		);
 		setTabs(newTabs);
 	};
 
 	const validateUserInput = useCallback(
 		(_key?: string, _value?: string, _activeTab?: number) => {
-			let invalidFields: string[] = [];
+			const invalidFields: string[] = [];
 			const validState = {};
 			if (_key !== undefined && _value !== undefined) {
 				if (_activeTab !== undefined) {
@@ -200,7 +200,7 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 			setValidState(validState);
 			return invalidFields;
 		},
-		[tabs, activeTab]
+		[tabs, activeTab],
 	);
 
 	const handleInput = useCallback(
@@ -214,7 +214,7 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 					: {
 							...tab,
 							content: tab.content.map((item) => (item.key === key ? { ...item, value } : item)),
-					  }
+					  },
 			);
 
 			newTabs[activeTab].content.forEach((item) => {
@@ -225,7 +225,7 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 
 			setTabs(newTabs);
 		},
-		[activeTab, tabs]
+		[activeTab, tabs],
 	);
 
 	useEffect(() => {

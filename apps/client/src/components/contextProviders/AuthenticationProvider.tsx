@@ -8,7 +8,7 @@ export const UserContext = createContext(
 	{} as {
 		userState: UserStateType;
 		setUserState: Dispatch<SetStateAction<UserStateType>>;
-	}
+	},
 );
 
 type AuthContextType = {
@@ -26,7 +26,7 @@ type AuthenticationProviderProps = {
 };
 
 export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ children }) => {
-	const [_, setCookie, removeCookie] = useCookies(['accessToken', 'refreshToken']);
+	const [, setCookie, removeCookie] = useCookies(['accessToken', 'refreshToken']);
 	const [userState, setUserState] = useState({} as UserStateType);
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -54,7 +54,6 @@ export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ childr
 				displayName: response.data.displayName,
 				email: response.data.email,
 			}));
-			return;
 		} catch (authenticationError: unknown) {
 			try {
 				const response = await axios.post('/api/refresh');
@@ -77,13 +76,13 @@ export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ childr
 	const loginUser = async (userId: string, password: string): Promise<boolean> => {
 		try {
 			const response = await axios.post('/api/login', {
-				userId: userId,
-				password: password,
+				userId,
+				password,
 			});
 
 			setTokenCookies(response);
 			return true;
-		} catch (error: any) {
+		} catch (error) {
 			console.error(error);
 			return false;
 		}
@@ -92,18 +91,18 @@ export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ childr
 		displayName: string,
 		userId: string,
 		email: string,
-		password: string
+		password: string,
 	): Promise<boolean> => {
 		try {
 			const response = await axios.post('/api/login', {
-				displayName: displayName,
-				email: email,
-				userId: userId,
-				password: password,
+				displayName,
+				email,
+				userId,
+				password,
 			});
 			setTokenCookies(response);
 			return true;
-		} catch (error: any) {
+		} catch (error) {
 			console.error(error);
 			return false;
 		}
@@ -122,10 +121,10 @@ export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ childr
 	};
 
 	const [authState] = useState({
-		authenticateUser: authenticateUser,
-		loginUser: loginUser,
-		registerUser: registerUser,
-		logoutUser: logoutUser,
+		authenticateUser,
+		loginUser,
+		registerUser,
+		logoutUser,
 	} as AuthContextType);
 
 	useEffect(() => {
@@ -134,7 +133,7 @@ export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ childr
 		})();
 	}, [location.pathname]);
 	return (
-		<UserContext.Provider value={{ userState: userState, setUserState: setUserState }}>
+		<UserContext.Provider value={{ userState, setUserState }}>
 			<AuthContext.Provider value={authState}>{children}</AuthContext.Provider>
 		</UserContext.Provider>
 	);

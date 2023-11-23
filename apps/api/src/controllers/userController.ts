@@ -4,16 +4,12 @@ import process from 'process';
 import bcrypt from 'bcrypt';
 import { authenticate, generateToken, refreshToken } from 'jwt-authorize';
 
-const userIdPattern = /^[a-z][a-z0-9_-]{2,29}$/;
-const emailPattern = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_+.,-])[A-Za-z\d@$!%*?&_+.,-]{8,}$/;
+const userIdPattern: RegExp = /^[a-z][a-z0-9_-]{2,29}$/;
+const emailPattern: RegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+const passwordPattern: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_+.,-])[A-Za-z\d@$!%*?&_+.,-]{8,}$/;
 
-declare global {
-	namespace Express {
-		interface Request {
-			user?: any;
-		}
-	}
+interface BismuthRequest extends Request {
+	user: typeof User;
 }
 
 const errorResponse = (res: Response, status: number, error: unknown) => {
@@ -33,13 +29,13 @@ const errorResponse = (res: Response, status: number, error: unknown) => {
 };
 
 export const doesUserExist = async (userId = '', email = '') => {
-	const foundUsername = await User.findOne({ userId: userId }).exec();
-	const foundEmail = await User.findOne({ email: email });
+	const foundUsername = await User.findOne({ userId }).exec();
+	const foundEmail = await User.findOne({ email });
 
 	return !!foundUsername || foundEmail;
 };
 
-export const loginUser = async (req: Request, res: Response) => {
+export const loginUser = async (req: BismuthRequest, res: Response) => {
 	const { userId, password } = req.body;
 
 	if (!userIdPattern.test(userId)) {
@@ -51,7 +47,7 @@ export const loginUser = async (req: Request, res: Response) => {
 	}
 
 	try {
-		const foundUser = await User.findOne({ userId: userId }).exec();
+		const foundUser = await User.findOne({ userId }).exec();
 		if (!foundUser) {
 			return res.status(401).json({
 				accessToken: null,
@@ -83,7 +79,7 @@ export const loginUser = async (req: Request, res: Response) => {
 				payload: { userId: foundUser._id },
 				secret: refreshSecret!,
 				options: { expiresIn: '7d' },
-			}
+			},
 		);
 
 		return res.status(200).json({
@@ -96,7 +92,7 @@ export const loginUser = async (req: Request, res: Response) => {
 	}
 };
 
-export const registerUser = async (req: Request, res: Response) => {
+export const registerUser = async (req: BismuthRequest, res: Response) => {
 	const { userId, displayName, email, password } = req.body;
 
 	if (!userIdPattern.test(userId)) {
@@ -136,9 +132,9 @@ export const registerUser = async (req: Request, res: Response) => {
 		const hashedPassword = await bcrypt.hash(password, userSalt);
 
 		const user = new User({
-			userId: userId,
-			displayName: displayName,
-			email: email,
+			userId,
+			displayName,
+			email,
 			password: hashedPassword,
 		});
 
@@ -158,7 +154,7 @@ export const registerUser = async (req: Request, res: Response) => {
 				payload: { userId: savedUser._id },
 				secret: refreshSecret!,
 				options: { expiresIn: '7d' },
-			}
+			},
 		);
 
 		return res.status(201).json({
@@ -201,7 +197,7 @@ export const refreshUser = async (req: Request, res: Response) => {
 	}
 };
 
-export const authenticateUser = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const authenticateUser = async (req: BismuthRequest, res: Response, next: NextFunction): Promise<void> => {
 	try {
 		const accessToken = req.cookies.accessToken;
 		if (!accessToken) {
@@ -209,7 +205,7 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
 			return;
 		}
 
-		const result = authenticate({ accessToken: accessToken }, process.env.API_JWT_SECRET || '');
+		const result = authenticate({ accessToken }, process.env.API_JWT_SECRET || '');
 		if (result.status !== 200) {
 			res.status(result.status!).json({ error: 'Unauthorized' }); // Add return here
 			return;
@@ -218,17 +214,15 @@ export const authenticateUser = async (req: Request, res: Response, next: NextFu
 		req.user = await User.findById(result.payload?.userId).select('-password');
 		console.log(req.user);
 		next();
-		return;
 	} catch (error) {
-		res.status(500).json({ error: error });
-		return;
+		res.status(500).json({ error });
 	}
 };
 
-export const getUserData = async (req: Request, res: Response) => {
+export const getUserData = async (req: BismuthRequest, res: Response) => {
 	try {
 		res.json(req.user);
 	} catch (error) {
-		res.status(500).json({ error: error });
+		res.status(500).json({ error });
 	}
 };

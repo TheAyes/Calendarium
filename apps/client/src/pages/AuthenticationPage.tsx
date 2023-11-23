@@ -79,7 +79,7 @@ const specialPasswordCharacters = '[ @, $, !, %, *, ?, &, -, _, +, ., , ]';
 
 export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 	const [activeTab, setActiveTab] = useState(0);
-	const [cookies, _] = useCookies(['language']);
+	const [cookies] = useCookies(['language']);
 
 	const [tabs, setTabs] = useState([
 		{
@@ -260,14 +260,14 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 				: {
 						...tab,
 						content: tab.content.map((item) => ({ ...item, isFocused: false })),
-				  }
+				  },
 		);
 		setTabs(newTabs);
 	};
 
 	const currentFocusedInputField = useMemo(
 		() => tabs[activeTab].content.find((currentItem) => currentItem.isFocused),
-		[activeTab, tabs]
+		[activeTab, tabs],
 	);
 
 	return (
