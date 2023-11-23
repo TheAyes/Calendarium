@@ -1,7 +1,7 @@
 version: "1.0"
 linter: jetbrains/qodana-js:2023.2
 profile:
-  name: qodana.starter
+    name: qodana.starter
 include:
-  - name: CheckDependencyLicenses
-bootstrap: pnpm install
+    -   name: CheckDependencyLicenses
+#bootstrap: pnpm install
