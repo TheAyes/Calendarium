@@ -13,7 +13,7 @@ const generateTableOfContents = async () => {
 	try {
 		const readmeContent = await fs.promises.readFile(pathToReadme, 'utf-8');
 		const headings = readmeContent.match(
-			/^(?!#\s*Calendarium$)(?!##\s*Table of Contents$)(?!# Table of Content$)(#+)\s(.+)/gm
+			/^(?!#\s*Calendarium$)(?!##\s*Table of Contents$)(?!# Table of Content$)(#+)\s(.+)/gm,
 		);
 
 		if (headings) {
@@ -40,4 +40,4 @@ const generateTableOfContents = async () => {
 	}
 };
 
-generateTableOfContents();
+await generateTableOfContents();

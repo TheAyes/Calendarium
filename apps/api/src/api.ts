@@ -1,7 +1,7 @@
 import process from 'process';
 import express, { Application, Request, Response } from 'express';
 import { Endpoint, ValidationSchema } from './types/types';
-import { validateRequest } from './controllers/requestController.ts';
+import { validateRequest } from './controllers/requestController';
 import * as path from 'path';
 import { dirname } from 'path';
 import { fileURLToPath } from 'url';
@@ -9,7 +9,7 @@ import cookieParser from 'cookie-parser';
 import Joi from 'joi';
 import { config } from 'dotenv';
 import mongoose from 'mongoose';
-import { authenticateUser, getUserData, loginUser, refreshUser, registerUser } from './controllers/userController.ts';
+import { authenticateUser, getUserData, loginUser, refreshUser, registerUser } from './controllers/userController';
 
 config({ path: '../../.env' });
 
@@ -35,7 +35,7 @@ app.use(express.json());
 app.use(cookieParser());
 
 await mongoose.connect(
-	`mongodb+srv://${process.env.API_DB_USER}:${process.env.API_DB_PW}@${process.env.API_DB_CLUSTER}.${process.env.API_DB_SHARD}.mongodb.net/calendarium-data?retryWrites=true&w=majority`
+	`mongodb+srv://${process.env.API_DB_USER}:${process.env.API_DB_PW}@${process.env.API_DB_CLUSTER}.${process.env.API_DB_SHARD}.mongodb.net/calendarium-data?retryWrites=true&w=majority`,
 );
 
 const endpoints: Endpoint[] = [
@@ -110,5 +110,5 @@ endpoints.forEach((endpoint) => {
 });
 
 app.listen(port, () => {
-	console.log(`Server running on: http://${host}:${port}`);
+	console.log(`Server running on: https://${host}:${port}`);
 });

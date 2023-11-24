@@ -4,5 +4,32 @@
 		{
 			"path": "apps/client/tsconfig.json"
 		}
+	],
+	"compilerOptions": {
+		"incremental": true,
+		"baseUrl": ".",
+		"moduleResolution": "nodenext",
+		"module": "esnext",
+		"target": "esnext",
+		"sourceMap": true,
+		"lib": [
+			"esnext"
+		],
+		"skipLibCheck": true,
+		"esModuleInterop": true,
+		"alwaysStrict": true,
+		"strictNullChecks": true,
+		"noImplicitAny": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
+		"noUnusedLocals": true,
+		"resolveJsonModule": true
+	},
+	"include": [
+		"src/**/*"
+	],
+	"exclude": [
+		"node_modules",
+		"*.d.ts"
 	]
 }

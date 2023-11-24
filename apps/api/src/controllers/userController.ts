@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { User } from '../models/User.ts';
+import { User } from '../models/User';
 import process from 'process';
 import bcrypt from 'bcrypt';
 import { authenticate, generateToken, refreshToken } from 'jwt-authorize';
@@ -9,7 +9,7 @@ const emailPattern: RegExp = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 const passwordPattern: RegExp = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_+.,-])[A-Za-z\d@$!%*?&_+.,-]{8,}$/;
 
 interface BismuthRequest extends Request {
-	user: typeof User;
+	user?: typeof User;
 }
 
 const errorResponse = (res: Response, status: number, error: unknown) => {
@@ -211,7 +211,7 @@ export const authenticateUser = async (req: BismuthRequest, res: Response, next:
 			return;
 		}
 
-		req.user = await User.findById(result.payload?.userId).select('-password');
+		req.user = (await User.findById(result.payload?.userId).select('-password')) as typeof User;
 		console.log(req.user);
 		next();
 	} catch (error) {
