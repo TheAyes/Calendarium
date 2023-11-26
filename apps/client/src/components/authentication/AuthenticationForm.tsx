@@ -175,7 +175,7 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 					const item = contents.find((c) => c.key === _key);
 					if (item?.rules) {
 						item.rules.forEach((rule) => {
-							const isValid = rule.checkFunction(_value, contents);
+							const isValid = rule.checkFunction(_value);
 							if (!isValid) invalidFields.push(_key);
 						});
 					}
@@ -187,7 +187,7 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 				const contents = tabs[activeTab].content;
 				contents.forEach((item) => {
 					item.rules?.forEach((rule) => {
-						const isValid = rule.checkFunction(item.value, contents);
+						const isValid = rule.checkFunction(item.value);
 						if (!isValid) invalidFields.push(item.key);
 					});
 				});
@@ -219,7 +219,7 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 
 			newTabs[activeTab].content.forEach((item) => {
 				item.rules?.forEach((rule) => {
-					rule.checkFunction(value, newTabs[activeTab].content);
+					rule.checkFunction(value);
 				});
 			});
 
@@ -238,6 +238,7 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 				{tabs[activeTab].content.map((currentItem, index) => {
 					return (
 						<motion.input
+							id={currentItem.key}
 							key={currentItem.key}
 							value={currentItem.type === 'submit' ? currentItem.placeholder : undefined}
 							layout

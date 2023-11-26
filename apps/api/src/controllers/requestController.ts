@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from 'express';
-import { ValidationSchema } from '../types/types.ts';
+import { ValidationSchema } from '../types/types';
 
 export const validateRequest =
 	(...validationSchemas: ValidationSchema[]) =>

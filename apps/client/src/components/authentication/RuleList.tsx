@@ -57,7 +57,7 @@ export const RuleList: React.FC<RuleListProps> = ({ currentFocusedInputField, ta
 							}}
 						>
 							<span>
-								{currentRule.checkFunction(currentFocusedInputField.value, tabs[activeTab].content)
+								{currentRule.checkFunction(currentFocusedInputField.value)
 									? '✔️'
 									: '❌'}
 							</span>

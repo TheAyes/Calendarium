@@ -1,6 +1,6 @@
 export type FormRule = {
 	description: string;
-	checkFunction: (arg0: string) => boolean;
+	checkFunction: (arg0: string, arg1?: string) => boolean;
 	additionalData?: string;
 };
 

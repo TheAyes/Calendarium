@@ -2,11 +2,8 @@
 	"name": "@calendarium/api",
 	"version": "1.0.0",
 	"type": "module",
-	"engines": {
-		"node": "21.2.0"
-	},
 	"scripts": {
-		"start": "nodemon ./src/api.ts",
+		"start": "tsx ./src/api.ts",
 		"build": "tsc"
 	},
 	"dependencies": {

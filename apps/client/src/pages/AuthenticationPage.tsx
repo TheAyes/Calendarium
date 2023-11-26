@@ -2,7 +2,7 @@ import { FC, useMemo, useState } from 'react';
 import styled from '@emotion/styled';
 import { AnimatePresence, LayoutGroup, motion } from 'framer-motion';
 import { CalendariumTheme } from '../types/CalendariumTheme.ts';
-import { Tab, TabContent } from '../types/AuthenticationTypes.ts';
+import { Tab } from '../types/AuthenticationTypes.ts';
 import { AuthenticationHelper } from '../components/authentication/AuthenticationHelper.tsx';
 import { AuthenticationForm } from '../components/authentication/AuthenticationForm.tsx';
 import { translations } from '../localization/translations.ts';
@@ -70,8 +70,9 @@ const containsUpperCase = (input: string) => /[A-Z]/.test(input);
 const containsDigit = (input: string) => /\d/.test(input);
 const containsSpecialCharacter = (input: string) => /[@$!%*?&_+.,-]/.test(input);
 const isMinimumLength = (input: string) => input.length >= 8;
-const matchWithPreviousPassword = (input: string, formValues: TabContent[]) => {
-	const passwordInput = formValues?.find((item) => item.key === 'passwordInput');
+const matchWithPreviousPassword = (input: string, targetId:string) => {
+	const passwordInput = document.getElementById(targetId) as HTMLInputElement;
+	//const passwordInput = formValues?.find((item) => item.key === 'passwordInput');
 	return passwordInput ? passwordInput.value === input : false;
 };
 const isValidEmail = (input: string) => /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(input);
@@ -236,8 +237,8 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 							description:
 								translations[cookies.language || 'en'].register.content.confirmPassword.rules?.[1]
 									.description,
-							checkFunction: (input, formValues): boolean =>
-								matchWithPreviousPassword(input, formValues!),
+							checkFunction: (input): boolean =>
+								matchWithPreviousPassword(input, 'passwordInput'),
 						},
 					],
 				},

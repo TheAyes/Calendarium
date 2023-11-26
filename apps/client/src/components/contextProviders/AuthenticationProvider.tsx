@@ -94,7 +94,7 @@ export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ childr
 		password: string,
 	): Promise<boolean> => {
 		try {
-			const response = await axios.post('/api/login', {
+			const response = await axios.post('/api/register', {
 				displayName,
 				email,
 				userId,
