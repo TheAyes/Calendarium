@@ -55,9 +55,9 @@ export const GlobalStyles = () => {
 							color: ${currentTheme.colors?.formElements?.inputField?.default.textColor};
 							border: none;
 
-							transition: background-color 500ms, color 500ms, border 500ms;
+							//transition: background-color 500ms, color 500ms, border 500ms;
 
-							&:hover {
+							/*&:hover {
 								background: ${currentTheme.colors?.formElements?.inputField?.hovered?.fillColor};
 								color: ${currentTheme.colors?.formElements?.inputField?.hovered?.textColor};
 							}
@@ -65,7 +65,7 @@ export const GlobalStyles = () => {
 							&:focus {
 								background: ${currentTheme.colors?.formElements?.inputField?.focused?.fillColor};
 								color: ${currentTheme.colors?.formElements?.inputField?.focused?.textColor};
-							}
+							}*/
 						}
 					}
 				}
