@@ -1,80 +1,43 @@
-export type TextStyleProperty = {
-	fontFamily?: string;
-	fontSize?: string;
-	fontWeight?: number;
-	lineHeight?: string;
-	letterSpacing?: string;
-	textTransform?: 'none' | 'capitalize' | 'uppercase' | 'lowercase';
-	fontStyle?: 'normal' | 'italic' | 'oblique';
-	textDecoration?: string;
-};
+import { Color } from './Color.ts';
+import { Typography } from './Typography.ts';
+import { Breakpoints } from './Breakpoints.ts';
 
-export type ColorProperties = {
-	fillColor?: string;
-	borderColor?: string;
-	textColor?: string;
-};
+export class CalendariumTheme {
+	public primaryColor: Color = new Color('#2d80b8');
+	public secondaryColor: Color = new Color('#f05000');
+	public backgroundColor: Color = new Color('#1d1d1d');
+	public textColor: Color = new Color('#dedede');
+	public errorColor: Color = new Color('#ff2222');
 
-export type StateProperties = {
-	default: ColorProperties;
-	hovered?: ColorProperties;
-	pressed?: ColorProperties;
-	disabled?: ColorProperties;
-	focused?: ColorProperties;
-};
+	public bodyTypography: Typography = {
+		fontFamily: 'Arial, sans-serif',
+		fontSize: '16px',
+		fontWeight: 700,
+	};
 
-export type ElementStates = {
-	inputField?: StateProperties;
-	checkbox?: StateProperties;
-	radioButton?: StateProperties;
-	dropDownMenu?: StateProperties;
-};
+	public headingTypography: Typography = {
+		fontFamily: 'Roboto, sans-serif',
+		fontSize: '24px',
+		fontWeight: 900,
+	};
 
-export type LayerColors = {
-	button?: StateProperties;
-	header?: string;
-	footer?: string;
-	navigationMenu?: string;
-	text?: {
-		headingColor?: string;
-		paragraphColor?: string;
-		linkColor?: string;
+	public breakpoints: Breakpoints = {
+		xs: 0,
+		sm: 600,
+		md: 960,
+		lg: 1280,
+		xl: 1920,
 	};
-	background?: string;
-	formElements?: ElementStates;
-	cardColor?: string;
-	iconColor?: string;
-	borderColor?: string;
-	scrollbarColor?: string;
-};
 
-export type CalendariumTheme = {
-	colors: LayerColors;
-	typography?: {
-		h1?: TextStyleProperty;
-		h2?: TextStyleProperty;
-		h3?: TextStyleProperty;
-		h4?: TextStyleProperty;
-		h5?: TextStyleProperty;
-		h6?: TextStyleProperty;
-		p?: TextStyleProperty;
-		a?: TextStyleProperty;
-	};
-	spacing: (factor: number) => string;
-	breakpoints?: {
-		xs?: string;
-		sm?: string;
-		md?: string;
-		lg?: string;
-	};
-	zIndex?: {
-		appBar?: number;
-		drawer?: number;
-		modal?: number;
-		snackbar?: number;
-		tooltip?: number;
-	};
-	shape?: {
-		borderRadius?: string;
-	};
-};
+	/**
+	 * Constructs a CalendariumThemeV2 instance.
+	 *
+	 * @constructor
+	 * @param {Partial<CalendariumTheme>} [options] - An object containing optional values to override the default theme.
+	 */
+	constructor(options?: Partial<CalendariumTheme>) {
+		if (options) {
+			Object.assign(this, options);
+		}
+	}
+}

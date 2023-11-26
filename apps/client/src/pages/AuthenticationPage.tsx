@@ -34,28 +34,28 @@ const StyledAuthenticatePage = styled('div')`
 				cursor: pointer;
 				display: flex;
 				flex-direction: column;
-				background: ${(props) => (props.theme as CalendariumTheme).colors?.button?.focused?.fillColor};
+				background: ${(props) => (props.theme as CalendariumTheme).backgroundColor.main};
 				transition: background-color 200ms;
 
 				&.active {
-					background: ${(props) => (props.theme as CalendariumTheme).colors?.button?.focused?.fillColor};
+					background: ${(props) => (props.theme as CalendariumTheme).backgroundColor.light};
 				}
 
 				&:hover {
-					background: ${(props) => (props.theme as CalendariumTheme).colors?.button?.hovered?.fillColor};
+					background: ${(props) => (props.theme as CalendariumTheme).primaryColor.main}22;
 				}
 
-				& > P {
+				& > p {
 					padding: 0.5rem 0;
 					text-align: center;
 					user-select: none;
-					font-weight: ${(props) => (props.theme as CalendariumTheme).typography?.h2?.fontWeight};
+					font-weight: ${(props) => (props.theme as CalendariumTheme).bodyTypography.fontWeight};
 					flex: 1;
 				}
 
 				& > div {
 					height: 4px;
-					background: ${(props) => (props.theme as CalendariumTheme).colors?.button?.default.fillColor};
+					background: ${(props) => (props.theme as CalendariumTheme).primaryColor.main};
 				}
 			}
 		}
@@ -70,7 +70,7 @@ const containsUpperCase = (input: string) => /[A-Z]/.test(input);
 const containsDigit = (input: string) => /\d/.test(input);
 const containsSpecialCharacter = (input: string) => /[@$!%*?&_+.,-]/.test(input);
 const isMinimumLength = (input: string) => input.length >= 8;
-const matchWithPreviousPassword = (input: string, targetId:string) => {
+const matchWithPreviousPassword = (input: string, targetId: string) => {
 	const passwordInput = document.getElementById(targetId) as HTMLInputElement;
 	//const passwordInput = formValues?.find((item) => item.key === 'passwordInput');
 	return passwordInput ? passwordInput.value === input : false;
@@ -237,8 +237,7 @@ export const AuthenticationPage: FC<AuthenticatePageProps> = ({ ...props }) => {
 							description:
 								translations[cookies.language || 'en'].register.content.confirmPassword.rules?.[1]
 									.description,
-							checkFunction: (input): boolean =>
-								matchWithPreviousPassword(input, 'passwordInput'),
+							checkFunction: (input): boolean => matchWithPreviousPassword(input, 'passwordInput'),
 						},
 					],
 				},

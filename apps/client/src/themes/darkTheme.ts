@@ -28,6 +28,7 @@ export const darkTheme: CalendariumTheme = {
 			paragraphColor: white,
 			linkColor: lightBlue,
 		},
+		cardColor: '#232323',
 		background: '#121212',
 		formElements: {
 			...defaultTheme.colors.formElements,

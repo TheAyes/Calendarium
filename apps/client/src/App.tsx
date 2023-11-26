@@ -6,7 +6,7 @@ import { DashboardPage } from './pages/DashboardPage.tsx';
 import { AuthenticationProvider } from './components/contextProviders/AuthenticationProvider.tsx';
 import { useEffect } from 'react';
 import { useCookies } from 'react-cookie';
-import { darkTheme } from './themes/darkTheme.ts';
+import { CalendariumTheme } from './types/CalendariumTheme.ts';
 
 export const App = () => {
 	const [cookies, setCookie] = useCookies(['language']);
@@ -50,7 +50,7 @@ export const App = () => {
 	return (
 		<>
 			<AuthenticationProvider>
-				<ThemeProvider theme={darkTheme}>
+				<ThemeProvider theme={new CalendariumTheme()}>
 					<GlobalStyles />
 					<Routes>
 						<Route index path="/" element={<></>} />

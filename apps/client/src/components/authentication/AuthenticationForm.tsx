@@ -1,5 +1,6 @@
-import React, {
+import {
 	Dispatch,
+	FC,
 	FormEvent,
 	KeyboardEvent,
 	SetStateAction,
@@ -9,150 +10,161 @@ import React, {
 	useState,
 } from 'react';
 import styled from '@emotion/styled';
-import { AnimatePresence, motion } from 'framer-motion';
-import { Tab } from '../../types/AuthenticationTypes.ts';
+import { css, useTheme } from '@emotion/react';
 import { CalendariumTheme } from '../../types/CalendariumTheme.ts';
-import { useNavigate } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { AuthContext } from '../contextProviders/AuthenticationProvider.tsx';
+import { useNavigate } from 'react-router-dom';
+import { Tab } from '../../types/AuthenticationTypes.ts';
 
-const StyledAuthenticationForm = styled('form')`
-	grid-column: 1/2;
+type StyledAuthenticationFormV2Props = {
+	[key: string]: any;
+};
 
-	display: flex;
-	flex-direction: column;
+const StyledAuthenticationForm = styled('form')<StyledAuthenticationFormV2Props>(() => {
+	const theme = useTheme() as CalendariumTheme;
+	return css`
+      grid-column: 1/2;
 
-	gap: 1em;
+      display: flex;
+      flex-direction: column;
 
-	& > div {
-		display: flex;
-		background: rgba(255, 255, 255, 0.01);
+      gap: 1em;
 
-		transition: background-color 500ms, color 500ms, border 500ms;
+      & > div {
+        display: flex;
+        border: 2px solid transparent;
+        background: ${theme.backgroundColor.main};
 
-		&:hover {
-			background: ${(props) => (props.theme as CalendariumTheme).colors?.formElements?.inputField?.hovered?.fillColor};
-			color: ${(props) => (props.theme as CalendariumTheme).colors?.formElements?.inputField?.hovered?.textColor};
-		}
+        transition: background-color 200ms, color 200ms, border 200ms;
 
+        border-bottom: 2px solid ${theme.primaryColor.main};
 
-		&:has(input:focus) {
-			background: ${(props) => (props.theme as CalendariumTheme).colors?.formElements?.inputField?.focused?.fillColor};
-			color: ${(props) => (props.theme as CalendariumTheme).colors?.formElements?.inputField?.focused?.textColor};
-		}
+        &:hover {
+          background: ${theme.backgroundColor.light};
+          border-bottom: 2px solid ${theme.primaryColor.light};
 
-
-		& > input {
-			flex: 1;
-			padding: 16px;
-			background: none;
-			color: ${(props) => (props.theme as CalendariumTheme).colors?.text?.paragraphColor};
-			font-weight: ${(props) => (props.theme as CalendariumTheme).typography?.h2?.fontWeight};
-			position: relative;
-
-			&::placeholder {
-				color: rgb(120, 120, 180);
-			}
-
-			&:hover {
-				background: none;
-			}
-
-			@keyframes shake {
-				10%,
-				90% {
-					transform: translate3d(-2px, 0, 0);
-				}
-
-				20%,
-				80% {
-					transform: translate3d(2px, 0, 0);
-				}
-
-				30%,
-				50%,
-				70% {
-					transform: translate3d(-4px, 0, 0);
-				}
-
-				40%,
-				60% {
-					transform: translate3d(4px, 0, 0);
-				}
-			}
-		}
-
-		&:has(input[type='text']),
-		&:has(input[type='email']),
-		&:has(input[type='password']) {
-			border: 2px solid transparent;
-			border-bottom: 2px solid ${(props) =>
-				(props.theme as CalendariumTheme).colors?.formElements?.inputField?.default.borderColor};
-
-			&:hover {
-				border-bottom: 2px solid ${(props) =>
-					(props.theme as CalendariumTheme).colors?.formElements?.inputField?.hovered?.borderColor};
-			}
-
-			&:focus {
-				border-bottom: 2px solid ${(props) =>
-					(props.theme as CalendariumTheme).colors?.formElements?.inputField?.focused?.borderColor};
-			}
-		}
-
-		&:has(input[type='submit']) {
-			border: 2px solid ${(props) => (props.theme as CalendariumTheme).colors?.formElements?.inputField?.default.borderColor};
-
-			&:hover {
-				border: 2px solid ${(props) =>
-					(props.theme as CalendariumTheme).colors?.formElements?.inputField?.hovered?.borderColor};
-			}
-
-			&:focus {
-				border: 2px solid ${(props) =>
-					(props.theme as CalendariumTheme).colors?.formElements?.inputField?.focused?.borderColor};
-			}
-		}
-
-		& > button {
-			background: none;
-			border: none;
-			padding: 0 1em;
+          & > button > svg {
+            fill: ${theme.primaryColor.light};
+          }
+        }
 
 
-			& > svg {
-				width: 2em;
-				display: block;
-				transition: fill 500ms;
-				fill: ${(props) => (props.theme as CalendariumTheme).colors?.formElements?.inputField?.default.borderColor};
-			}
+        &:not(.error):has(input:focus) {
+          background: ${theme.primaryColor.dark}22;
+          border-bottom: 2px solid ${theme.primaryColor.lighter};
 
-			&:hover > svg {
-				fill: ${(props) => (props.theme as CalendariumTheme).colors?.formElements?.inputField?.hovered?.borderColor};
-			}
+          & > input::placeholder {
+            color: inherit;
+          }
 
-			&:active > svg {
-				fill: ${(props) => (props.theme as CalendariumTheme).colors?.formElements?.inputField?.focused?.borderColor};
-			}
-		}
-	}
-}
+          & > button > svg {
+            fill: ${theme.primaryColor.lighter};
+          }
+        }
 
-}
+        & > input {
+          flex: 1;
+          padding: 16px;
+          background: inherit;
+          font-weight: ${theme.bodyTypography.fontWeight};
+          position: relative;
 
-& > p {
-	text-align: center;
-	color: red;
-}
-`;
+          &:hover {
+            background: inherit;
+          }
 
-type AuthenticationFormProps = {
+          @keyframes shake {
+            10%,
+            90% {
+              transform: translate3d(-2px, 0, 0);
+            }
+
+            20%,
+            80% {
+              transform: translate3d(2px, 0, 0);
+            }
+
+            30%,
+            50%,
+            70% {
+              transform: translate3d(-4px, 0, 0);
+            }
+
+            40%,
+            60% {
+              transform: translate3d(4px, 0, 0);
+            }
+          }
+        }
+
+        &:has(input[type='submit']) {
+          border: 2px solid ${theme.primaryColor.main};
+
+          &:hover {
+            border: 2px solid ${theme.primaryColor.light};
+          }
+
+          &:focus, &:active {
+            color: 2px solid ${theme.secondaryColor.main};
+            border: 2px solid ${theme.secondaryColor.main};
+          }
+        }
+
+        & > button {
+          background: inherit;
+          border: none;
+          padding: 0 1em;
+
+
+          & > svg {
+            width: 1.6em;
+            display: block;
+            transition: fill 500ms;
+            fill: ${theme.primaryColor.main};
+          }
+
+          &:active > svg {
+            fill: ${theme.secondaryColor.main};
+          }
+        }
+
+        &.error {
+          animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+          border: 2px solid ${theme.errorColor.main};
+          color: ${theme.errorColor.main};
+
+          & > input {
+            color: inherit;
+
+            &::placeholder {
+              color: inherit;
+            }
+          }
+
+          & > button > svg {
+            fill: ${theme.errorColor.main};
+          }
+        }
+      }
+    }
+
+
+    & > p {
+      text-align: center;
+      color: ${theme.errorColor.main};;
+    }
+	`;
+});
+
+type AuthenticationFormV2Props = {
 	tabs: Tab[];
 	setTabs: Dispatch<SetStateAction<Tab[]>>;
 	activeTab: number;
-	[key: string]: unknown;
+	[key: string]: any;
 };
 
-export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, activeTab, setTabs, ...props }) => {
+export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, activeTab, setTabs, ...props }) => {
 	const [validState, setValidState] = useState<Record<string, boolean>>({});
 	const [authError, setAuthError] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
@@ -341,13 +353,7 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 								stiffness: 120,
 								damping: 14,
 							}}
-							style={{
-								border: validState[currentItem.key] === false ? '2px solid red' : undefined,
-								animation:
-									validState[currentItem.key] === false
-										? 'shake 0.5s cubic-bezier(.36,.07,.19,.97) both'
-										: undefined,
-							}}
+							className={validState[currentItem.key] === false ? 'error' : ''}
 						>
 							<input
 								id={currentItem.key}
@@ -416,3 +422,5 @@ export const AuthenticationForm: React.FC<AuthenticationFormProps> = ({ tabs, ac
 		</StyledAuthenticationForm>
 	);
 };
+
+export default AuthenticationForm;

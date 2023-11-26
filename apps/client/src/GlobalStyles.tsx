@@ -14,34 +14,30 @@ export const GlobalStyles = () => {
 
 				html {
 					scroll-behavior: smooth;
-					background: ${currentTheme.colors?.background};
+					background: ${currentTheme.backgroundColor.dark};
 
 					body {
 						overflow-x: hidden;
-						color: ${currentTheme.colors?.text?.paragraphColor};
+						color: ${currentTheme.textColor.main};
 
-						// Typography //
-						font-family: ${currentTheme.typography?.p?.fontFamily};
-						font-size: ${currentTheme.typography?.p?.fontSize};
+						font-family: ${currentTheme.bodyTypography.fontFamily};
+						font-size: ${currentTheme.bodyTypography.fontSize};
+						font-weight: ${currentTheme.bodyTypography.fontWeight};
 
-						h1 {
-							font-size: ${currentTheme.typography?.h1?.fontSize};
-							color: ${currentTheme.colors?.text?.headingColor};
-						}
-
-						h2 {
-							font-size: ${currentTheme.typography?.h2?.fontSize};
-							color: ${currentTheme.colors?.text?.headingColor};
-						}
-
-						p {
-							font-size: ${currentTheme.typography?.p?.fontSize};
-							color: ${currentTheme.colors?.text?.paragraphColor};
+						h1,
+						h2,
+						h3,
+						h4,
+						h5,
+						h6 {
+							font-family: ${currentTheme.headingTypography.fontFamily};
+							font-size: ${currentTheme.headingTypography.fontSize};
+							font-weight: ${currentTheme.headingTypography.fontWeight};
 						}
 
 						a {
-							color: ${currentTheme.colors?.text?.linkColor};
-							text-decoration: ${currentTheme.typography?.a?.textDecoration};
+							color: inherit;
+							text-decoration: inherit;
 						}
 
 						ul {
@@ -51,21 +47,37 @@ export const GlobalStyles = () => {
 						input {
 							outline: none;
 
-							background-color: rgba(255, 255, 255, 0.01);
-							color: ${currentTheme.colors?.formElements?.inputField?.default.textColor};
+							background-color: ${currentTheme.backgroundColor.main};
+							color: ${currentTheme.primaryColor.main};
 							border: none;
 
-							//transition: background-color 500ms, color 500ms, border 500ms;
+							&::placeholder {
+								transition: color 200ms;
+								color: ${currentTheme.primaryColor.main};
+							}
 
-							/*&:hover {
-								background: ${currentTheme.colors?.formElements?.inputField?.hovered?.fillColor};
-								color: ${currentTheme.colors?.formElements?.inputField?.hovered?.textColor};
+							&:-webkit-autofill {
+								box-shadow: 0 0 0 30px ${currentTheme.backgroundColor.main} inset;
+								-webkit-text-fill-color: ${currentTheme.primaryColor.light};
+							}
+
+							&:hover {
+								color: ${currentTheme.primaryColor.light};
+								background: ${currentTheme.backgroundColor.light};
+
+								&::placeholder {
+									color: ${currentTheme.primaryColor.light};
+								}
+
+								&:-webkit-autofill {
+									box-shadow: 0 0 0 30px ${currentTheme.backgroundColor.light} inset;
+									-webkit-text-fill-color: ${currentTheme.primaryColor.light};
+								}
 							}
 
 							&:focus {
-								background: ${currentTheme.colors?.formElements?.inputField?.focused?.fillColor};
-								color: ${currentTheme.colors?.formElements?.inputField?.focused?.textColor};
-							}*/
+								color: ${currentTheme.primaryColor.lighter};
+							}
 						}
 					}
 				}
