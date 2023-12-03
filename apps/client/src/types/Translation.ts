@@ -1,10 +1,12 @@
+export type SupportedLanguages = 'en' | 'de' | 'jp' | 'fr';
+
 type _AuthenticationString = {
 	label: string;
 	content: {
 		[key: string]: {
 			placeholder: string;
 			description: string;
-			rules?: { description: string }[];
+			rules: { description: string }[];
 		};
 	};
 };
@@ -15,5 +17,5 @@ type _LanguageStrings = {
 };
 
 export type Translation = {
-	[key: string]: _LanguageStrings;
+	[key in SupportedLanguages]: _LanguageStrings;
 };

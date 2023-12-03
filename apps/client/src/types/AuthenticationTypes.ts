@@ -1,6 +1,8 @@
+import { checkFunctions } from '../utils/helperFunctions';
+
 export type FormRule = {
 	description: string;
-	checkFunction: (arg0: string, arg1?: string) => boolean;
+	checkFunction: keyof typeof checkFunctions;
 	additionalData?: string;
 };
 

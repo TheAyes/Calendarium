@@ -1,12 +1,10 @@
-import { GlobalStyles } from './GlobalStyles.tsx';
-import { ThemeProvider } from '@emotion/react';
 import { Route, Routes } from 'react-router-dom';
-import { AuthenticationPage } from './pages/AuthenticationPage.tsx';
-import { DashboardPage } from './pages/DashboardPage.tsx';
-import { AuthenticationProvider } from './components/contextProviders/AuthenticationProvider.tsx';
+import { AuthenticationPage } from './pages/AuthenticationPage';
+import { DashboardPage } from './pages/DashboardPage';
 import { useEffect } from 'react';
 import { useCookies } from 'react-cookie';
-import { CalendariumTheme } from './types/CalendariumTheme.ts';
+import Wrappers from './Wrappers';
+import { GlobalStyles } from './GlobalStyles';
 
 export const App = () => {
 	const [cookies, setCookie] = useCookies(['language']);
@@ -49,17 +47,15 @@ export const App = () => {
 
 	return (
 		<>
-			<AuthenticationProvider>
-				<ThemeProvider theme={new CalendariumTheme()}>
-					<GlobalStyles />
-					<Routes>
-						<Route index path="/" element={<></>} />
-						<Route path="/authenticate" element={<AuthenticationPage />} />
-						<Route path="/dashboard" element={<DashboardPage />} />
-						<Route path="/*" element={<AuthenticationPage />} />
-					</Routes>
-				</ThemeProvider>
-			</AuthenticationProvider>
+			<Wrappers>
+				<GlobalStyles />
+				<Routes>
+					<Route index path="/" element={<></>} />
+					<Route path="/authenticate" element={<AuthenticationPage />} />
+					<Route path="/dashboard" element={<DashboardPage />} />
+					<Route path="/*" element={<AuthenticationPage />} />
+				</Routes>
+			</Wrappers>
 		</>
 	);
 };

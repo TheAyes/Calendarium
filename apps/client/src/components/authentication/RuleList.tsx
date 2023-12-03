@@ -1,7 +1,8 @@
 import React from 'react';
 import styled from '@emotion/styled';
 import { AnimatePresence, motion } from 'framer-motion';
-import { Tab, TabContent } from '../../types/AuthenticationTypes.ts';
+import { Tab, TabContent } from '../../types/AuthenticationTypes';
+import { checkFunctions } from '../../utils/helperFunctions';
 
 const StyledRuleList = styled('ul')`
 	display: flex;
@@ -33,34 +34,33 @@ export const RuleList: React.FC<RuleListProps> = ({ currentFocusedInputField, ta
 					if (!currentRule) {
 						return <></>;
 					}
+
+					const isValid = checkFunctions[currentRule.checkFunction](currentFocusedInputField.value, '');
+
 					return (
 						<motion.li
 							key={currentRule.description + i}
 							initial={{
 								x: 50,
-								opacity: 0,
+								opacity: 0
 							}}
 							animate={{
 								x: 0,
-								opacity: 1,
+								opacity: 1
 							}}
 							exit={{
 								x: 50,
-								opacity: 0,
+								opacity: 0
 							}}
 							transition={{
 								type: 'spring',
 								duration: 0.5,
 								stiffness: 120,
 								damping: 14,
-								delay: i * 0.05,
+								delay: i * 0.05
 							}}
 						>
-							<span>
-								{currentRule.checkFunction(currentFocusedInputField.value)
-									? '✔️'
-									: '❌'}
-							</span>
+							<span>{isValid ? '✔️' : '❌'}</span>
 							<div>
 								<p>{currentRule.description}</p>
 								{currentRule.additionalData && <p>{currentRule.additionalData}</p>}

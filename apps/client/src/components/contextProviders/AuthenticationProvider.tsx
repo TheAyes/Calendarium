@@ -8,7 +8,7 @@ export const UserContext = createContext(
 	{} as {
 		userState: UserStateType;
 		setUserState: Dispatch<SetStateAction<UserStateType>>;
-	},
+	}
 );
 
 type AuthContextType = {
@@ -26,7 +26,7 @@ type AuthenticationProviderProps = {
 };
 
 export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ children }) => {
-	const [, setCookie, removeCookie] = useCookies(['accessToken', 'refreshToken']);
+	const [cookies, setCookie, removeCookie] = useCookies(['accessToken', 'refreshToken']);
 	const [userState, setUserState] = useState({} as UserStateType);
 	const navigate = useNavigate();
 	const location = useLocation();
@@ -43,6 +43,8 @@ export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ childr
 
 	const [authenticationRetries, setAuthenticationRetries] = useState(0);
 	const authenticateUser = async () => {
+		if (!cookies.accessToken) return;
+
 		if (authenticationRetries > 3) {
 			setAuthenticationRetries(0);
 			throw Error('Authentication failed with too many retries.');
@@ -52,7 +54,7 @@ export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ childr
 			setUserState((prevState) => ({
 				...prevState,
 				displayName: response.data.displayName,
-				email: response.data.email,
+				email: response.data.email
 			}));
 		} catch (authenticationError: unknown) {
 			try {
@@ -65,9 +67,9 @@ export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ childr
 			} catch (refreshError) {
 				if (refreshError instanceof AxiosError) {
 					if (refreshError.status !== 200) return navigate('/authenticate');
-					console.error(refreshError);
+					//console.error(refreshError);
 				} else {
-					console.error(refreshError);
+					//console.error(refreshError);
 				}
 			}
 		}
@@ -77,7 +79,7 @@ export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ childr
 		try {
 			const response = await axios.post('/api/login', {
 				userId,
-				password,
+				password
 			});
 
 			setTokenCookies(response);
@@ -91,14 +93,14 @@ export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ childr
 		displayName: string,
 		userId: string,
 		email: string,
-		password: string,
+		password: string
 	): Promise<boolean> => {
 		try {
 			const response = await axios.post('/api/register', {
 				displayName,
 				email,
 				userId,
-				password,
+				password
 			});
 			setTokenCookies(response);
 			return true;
@@ -124,7 +126,7 @@ export const AuthenticationProvider: FC<AuthenticationProviderProps> = ({ childr
 		authenticateUser,
 		loginUser,
 		registerUser,
-		logoutUser,
+		logoutUser
 	} as AuthContextType);
 
 	useEffect(() => {

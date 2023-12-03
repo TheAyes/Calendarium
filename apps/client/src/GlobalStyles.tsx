@@ -1,5 +1,5 @@
 import { css, Global, useTheme } from '@emotion/react';
-import { CalendariumTheme } from './types/CalendariumTheme.ts';
+import { CalendariumTheme } from './types/CalendariumTheme';
 
 export const GlobalStyles = () => {
 	const currentTheme = useTheme() as CalendariumTheme;

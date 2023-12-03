@@ -7,15 +7,18 @@ import {
 	useCallback,
 	useContext,
 	useEffect,
-	useState,
+	useState
 } from 'react';
 import styled from '@emotion/styled';
 import { css, useTheme } from '@emotion/react';
-import { CalendariumTheme } from '../../types/CalendariumTheme.ts';
+import { CalendariumTheme } from '../../types/CalendariumTheme';
 import { AnimatePresence, motion } from 'framer-motion';
-import { AuthContext } from '../contextProviders/AuthenticationProvider.tsx';
+import { AuthContext } from '../contextProviders/AuthenticationProvider';
 import { useNavigate } from 'react-router-dom';
-import { Tab } from '../../types/AuthenticationTypes.ts';
+import { Tab } from '../../types/AuthenticationTypes';
+import { selectActiveTab, selectErrorMessage, setErrorMessage } from '../../features/authenticationSlice';
+import { useDispatch, useSelector } from 'react-redux';
+import { checkFunctions } from '../../utils/helperFunctions';
 
 type StyledAuthenticationFormV2Props = {
 	[key: string]: any;
@@ -164,10 +167,14 @@ type AuthenticationFormV2Props = {
 	[key: string]: any;
 };
 
-export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, activeTab, setTabs, ...props }) => {
+export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, nullTab, setTabs, ...props }) => {
+	const dispatch = useDispatch();
+
 	const [validState, setValidState] = useState<Record<string, boolean>>({});
-	const [authError, setAuthError] = useState('');
+	const errorMessage = useSelector(selectErrorMessage);
 	const [showPassword, setShowPassword] = useState(false);
+
+	const activeTab = useSelector(selectActiveTab);
 
 	const authFunctions = useContext(AuthContext);
 	const navigate = useNavigate();
@@ -185,7 +192,7 @@ export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, active
 		const success: boolean = await authFunctions.loginUser(userId, password);
 
 		if (success) navigate('/dashboard');
-		else setAuthError('Invalid login credentials.');
+		else dispatch(setErrorMessage('Invalid login credentials.'));
 	};
 
 	const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
@@ -203,7 +210,7 @@ export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, active
 
 		const success: boolean = await authFunctions.registerUser(displayName, userId, email, password);
 		if (success) navigate('/dashboard');
-		else setAuthError('Invalid Registration');
+		else dispatch(setErrorMessage('Invalid Registration'));
 	};
 
 	const handleFocus = (key: string) => {
@@ -212,8 +219,8 @@ export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, active
 				? tab
 				: {
 						...tab,
-						content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: true } : item)),
-				  },
+						content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: true } : item))
+				  }
 		);
 		setTabs(newTabs);
 	};
@@ -224,8 +231,8 @@ export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, active
 				? tab
 				: {
 						...tab,
-						content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: false } : item)),
-				  },
+						content: tab.content.map((item) => (item.key === key ? { ...item, isFocused: false } : item))
+				  }
 		);
 		setTabs(newTabs);
 	};
@@ -241,7 +248,8 @@ export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, active
 					const item = contents.find((c) => c.key === _key);
 					if (item?.rules) {
 						item.rules.forEach((rule) => {
-							const isValid = rule.checkFunction(_value);
+							// const isValid = rule.checkFunction(_value);
+							const isValid = checkFunctions[rule.checkFunction];
 							if (!isValid) invalidFields.push(_key);
 						});
 					}
@@ -253,7 +261,7 @@ export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, active
 				const contents = tabs[activeTab].content;
 				contents.forEach((item) => {
 					item.rules?.forEach((rule) => {
-						const isValid = rule.checkFunction(item.value);
+						const isValid = checkFunctions[rule.checkFunction];
 						if (!isValid) invalidFields.push(item.key);
 					});
 				});
@@ -266,7 +274,7 @@ export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, active
 			setValidState(validState);
 			return invalidFields;
 		},
-		[tabs, activeTab],
+		[tabs, activeTab]
 	);
 
 	const handleInput = useCallback(
@@ -279,23 +287,23 @@ export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, active
 					? tab
 					: {
 							...tab,
-							content: tab.content.map((item) => (item.key === key ? { ...item, value } : item)),
-					  },
+							content: tab.content.map((item) => (item.key === key ? { ...item, value } : item))
+					  }
 			);
 
 			newTabs[activeTab].content.forEach((item) => {
 				item.rules?.forEach((rule) => {
-					rule.checkFunction(value);
+					checkFunctions[rule.checkFunction];
 				});
 			});
 
 			setTabs(newTabs);
 		},
-		[activeTab, tabs],
+		[activeTab, tabs]
 	);
 
 	useEffect(() => {
-		setAuthError('');
+		dispatch(setErrorMessage(''));
 	}, [activeTab]);
 
 	const handleMouseDown = () => {
@@ -336,24 +344,24 @@ export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, active
 							layout
 							initial={{
 								opacity: 0,
-								x: 100,
+								x: 100
 							}}
 							animate={{
 								opacity: 1,
-								x: 0,
+								x: 0
 							}}
 							exit={{
 								opacity: 0,
-								x: -100,
+								x: -100
 							}}
 							transition={{
 								delay: index * 0.05,
 								type: 'spring',
 								duration: 1,
 								stiffness: 120,
-								damping: 14,
+								damping: 14
 							}}
-							className={validState[currentItem.key] === false ? 'error' : ''}
+							className={validState[currentItem.key] ?? false ? 'error' : ''}
 						>
 							<input
 								id={currentItem.key}
@@ -417,7 +425,7 @@ export const AuthenticationForm: FC<AuthenticationFormV2Props> = ({ tabs, active
 						</motion.div>
 					);
 				})}
-				{authError && <motion.p>{authError}</motion.p>}
+				{errorMessage && <motion.p>{errorMessage}</motion.p>}
 			</AnimatePresence>
 		</StyledAuthenticationForm>
 	);
